@@ -13,18 +13,19 @@ export class TodoListImage extends Entity {
     id: true,
     generated: false,
   })
-  id: number;
-
-  @belongsTo(() => TodoList)
-  todoListId: number;
+  id?: number;
 
   @property({
+    type: 'string',
     required: true,
   })
   // Ideally we would use Buffer type here, but
   // that is not supported yet.
-  // see https://github.com/strongloop/loopback-next/issues/1742
+  // see https://github.com/loopbackio/loopback-next/issues/1742
   value: string;
+
+  @belongsTo(() => TodoList)
+  todoListId: number;
 
   constructor(data?: Partial<TodoListImage>) {
     super(data);
@@ -32,6 +33,7 @@ export class TodoListImage extends Entity {
 }
 
 export interface TodoListImageRelations {
+  // describe navigational properties here
   todoList?: TodoListWithRelations;
 }
 

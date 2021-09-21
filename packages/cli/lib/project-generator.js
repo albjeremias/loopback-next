@@ -169,7 +169,7 @@ module.exports = class ProjectGenerator extends BaseGenerator {
           // prompts if option was set to a directory that already exists
           utils.validateNotExisting(this.projectInfo.outdir) !== true,
         validate: utils.validateNotExisting,
-        default: utils.toFileName(this.projectInfo.name),
+        default: this.projectInfo.name && this.projectInfo.name.toLowerCase(),
       },
     ];
 
@@ -275,6 +275,7 @@ module.exports = class ProjectGenerator extends BaseGenerator {
       this.destinationPath(''),
       {
         project: this.projectInfo,
+        packageManager: this.config.get('packageManager'),
       },
     );
 

@@ -69,7 +69,7 @@ Besides AJV, other third-party validation libraries, such as
 
 Below are a few examples of using AJV for validation. The source code of the
 snippets can be found in the
-[coffee-shop.model.ts in the example app](https://github.com/strongloop/loopback-next/blob/master/examples/validation-app/src/models/coffee-shop.model.ts).
+[coffee-shop.model.ts in the example app](https://github.com/loopbackio/loopback-next/blob/master/examples/validation-app/src/models/coffee-shop.model.ts).
 
 {% include note.html content="The `jsonSchema` property expects [JSON Schema Draft-07](http://json-schema.org/draft/2019-09/json-schema-validation.html), which is then transformed into the [OAS 3](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md) variant." %}
 
@@ -178,9 +178,14 @@ of 10 digits separated by `-` after the 3rd and 6th digits.
 
 ## Customize validation errors
 
+{% include note.html content="This section describes customization for legacy
+[Action-based sequences](./REST-Action-sequence.md). Most LoopBack 4
+applications utilize the new
+[Middleware-based sequences](./REST-Middleware-sequence.md)." %}
+
 Since the error is being caught at the REST layer, the simplest way to customize
 the errors is to customize the
-[sequnce](https://loopback.io/doc/en/lb4/Sequence.html). It exists in all
+[sequence](https://loopback.io/doc/en/lb4/Sequence.html). It exists in all
 LoopBack applications scaffolded by using the `lb4` command and can be found in
 `src/sequence.ts`.
 

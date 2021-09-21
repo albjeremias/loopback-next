@@ -14,7 +14,7 @@ recommended for production. You can follow the guide in section
 [Customizing User](#customizing-user) to replace it.
 
 To learn how you can apply it in your application, check the example
-[todo-jwt](https://github.com/strongloop/loopback-next/tree/master/examples/todo-jwt)
+[todo-jwt](https://github.com/loopbackio/loopback-next/tree/master/examples/todo-jwt)
 and its tutorial
 [Apply JWT Authentication in Todo Example](https://loopback.io/doc/en/lb4/Authentication-tutorial.html)
 
@@ -27,7 +27,7 @@ and its tutorial
 
 ## Architecture Overview
 
-![authentication-jwt](https://raw.githubusercontent.com/strongloop/loopback-next/master/extensions/authentication-jwt/authentication-jwt.png)
+![authentication-jwt](https://raw.githubusercontent.com/loopbackio/loopback-next/master/extensions/authentication-jwt/authentication-jwt.png)
 
 ## Usage
 
@@ -43,6 +43,12 @@ Next enable the jwt authentication system in your application:
 
 <details>
 <summary markdown="span"><strong>Check The Code</strong></summary>
+
+{% include note.html content="
+Skip this step when using a
+[middleware-based sequence](https://loopback.io/doc/en/lb4/REST-middleware-sequence.html), which is used by
+default on newly-generated LoopBack 4 applications.
+" %}
 
 ```ts
 import {
@@ -96,6 +102,7 @@ export class MySequence implements SequenceHandler {
 import {AuthenticationComponent} from '@loopback/authentication';
 import {
   JWTAuthenticationComponent,
+  RefreshTokenServiceBindings,
   SECURITY_SCHEME_SPEC,
 } from '@loopback/authentication-jwt';
 
@@ -119,7 +126,7 @@ export class TestApplication extends BootMixin(
     // Bind datasource for user
     this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME);
     // Bind datasource for refresh token
-    this.dataSource(DbDataSource, RefreshTokenBindings.DATASOURCE_NAME);
+    this.dataSource(DbDataSource, RefreshTokenServiceBindings.DATASOURCE_NAME);
 
     this.component(RestExplorerComponent);
     this.projectRoot = __dirname;
@@ -145,8 +152,7 @@ This module contains an example application in the `fixtures` folder. It has a
 controller with endpoints `/login`, `/refreshlogin`, `/refresh` and `/whoAmI`.
 
 Before using the below snippet do not forget to inject below repositories and
-bindingings  
-in your controller's constructor
+bindings in your controller's constructor
 
 ```ts
     @inject(TokenServiceBindings.TOKEN_SERVICE)
@@ -228,13 +234,13 @@ the endpoint.
 ```
 
 The complete file is in
-[user.controller.ts](https://github.com/strongloop/loopback-next/tree/master/extensions/authentication-jwt/src/__tests__/fixtures/controllers/user.controller.ts)
+[user.controller.ts](https://github.com/loopbackio/loopback-next/tree/master/extensions/authentication-jwt/src/__tests__/fixtures/controllers/user.controller.ts)
 
 ## Customization
 
 As a prototype implementation this module provides basic functionalities in each
 service. You can customize and re-bind any element provided in the
-[component](https://github.com/strongloop/loopback-next/tree/master/extensions/authentication-jwt/src/jwt-authentication-component.ts)
+[component](https://github.com/loopbackio/loopback-next/tree/master/extensions/authentication-jwt/src/jwt-authentication-component.ts)
 with your own one.
 
 Replacing the `User` model is a bit more complicated because it's not injected
@@ -249,7 +255,7 @@ provide your own `User` model and repository.
 2. The user service requires the user model and repository, to provide your own
    ones, you can create a custom `UserService` and bind it to
    `UserServiceBindings.USER_SERVICE`. Take a look at
-   [the default user service](https://github.com/strongloop/loopback-next/blob/master/extensions/authentication-jwt/src/services/user.service.ts)
+   [the default user service](https://github.com/loopbackio/loopback-next/blob/master/extensions/authentication-jwt/src/services/user.service.ts)
    for an example of `UserService` implementation.
 
    For convenience, here is the code in `user.service.ts`. You can replace the
@@ -346,10 +352,10 @@ provide your own `User` model and repository.
        this.bind(UserServiceBindings.USER_SERVICE).toClass(CustomUserService),
        // Bind user and credentials repository
        this.bind(UserServiceBindings.USER_REPOSITORY).toClass(
-         UserRepository,
+         MyUserRepository,
        ),
        this.bind(UserServiceBindings.USER_CREDENTIALS_REPOSITORY).toClass(
-         UserCredentialsRepository,
+         MyUserCredentialsRepository,
        ),
      }
    }
@@ -384,8 +390,8 @@ the spec when app starts.
 
 ## Contributions
 
-- [Guidelines](https://github.com/strongloop/loopback-next/blob/master/docs/CONTRIBUTING.md)
-- [Join the team](https://github.com/strongloop/loopback-next/issues/110)
+- [Guidelines](https://github.com/loopbackio/loopback-next/blob/master/docs/CONTRIBUTING.md)
+- [Join the team](https://github.com/loopbackio/loopback-next/issues/110)
 
 ## Tests
 
@@ -394,7 +400,7 @@ Run `npm test` from the root folder.
 ## Contributors
 
 See
-[all contributors](https://github.com/strongloop/loopback-next/graphs/contributors).
+[all contributors](https://github.com/loopbackio/loopback-next/graphs/contributors).
 
 ## License
 

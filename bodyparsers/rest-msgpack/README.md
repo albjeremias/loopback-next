@@ -85,7 +85,7 @@ JavaScript object and validated against the JSON Schema.
 
 ### Returning MessagePack Requests
 
-{% include note.html content="The body parser will not convert responses into `application/msgpack` automatically. This feature is being tracked by [#6275](https://github.com/strongloop/loopback-next/issues/6275)" %}
+{% include note.html content="The body parser will not convert responses into `application/msgpack` automatically. This feature is being tracked by [#6275](https://github.com/loopbackio/loopback-next/issues/6275)" %}
 
 To return MessagePack requests in a controller, amend the requestBody decorator
 to include the MIME type as a possible response and use a parser library.
@@ -93,7 +93,7 @@ to include the MIME type as a possible response and use a parser library.
 For example, to update the Todo controller to return in MessagePack:
 
 ```ts
-// `msgpack-lite` is re-exported by `@loopback/rest-msgpack` for convenience.
+// `msgpack5` is re-exported by `@loopback/rest-msgpack` for convenience.
 // It is recommended to bind it to context the inject it to benefit from
 // dependency injection.
 import {MsgPackBodyParserBindings, msgpack} from '@loopback/rest-msgpack';
@@ -135,19 +135,19 @@ class TodoController {
     // Buffers are automatically detected as `application/octet-stream`.
     // We can use `Response.end()` to bypass that.
     //
-    // See: https://github.com/strongloop/loopback-next/issues/5168
+    // See: https://github.com/loopbackio/loopback-next/issues/5168
     //
     this._res
       .type('application/msgpack')
-      .end(msgpack.encode(this.todoRepository.find(filter)));
+      .end(msgpack().encode(this.todoRepository.find(filter)));
   }
 }
 ```
 
 ## Contributions
 
-- [Guidelines](https://github.com/strongloop/loopback-next/blob/master/docs/CONTRIBUTING.md)
-- [Join the team](https://github.com/strongloop/loopback-next/issues/110)
+- [Guidelines](https://github.com/loopbackio/loopback-next/blob/master/docs/CONTRIBUTING.md)
+- [Join the team](https://github.com/loopbackio/loopback-next/issues/110)
 
 ## Tests
 
@@ -156,7 +156,7 @@ Run `npm test` from the root folder.
 ## Contributors
 
 See
-[all contributors](https://github.com/strongloop/loopback-next/graphs/contributors).
+[all contributors](https://github.com/loopbackio/loopback-next/graphs/contributors).
 
 ## License
 

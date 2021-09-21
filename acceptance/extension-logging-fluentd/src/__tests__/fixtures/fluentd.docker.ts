@@ -12,16 +12,13 @@ export const ETC_DIR = path.join(ROOT_DIR, 'etc');
 
 async function startFluentd() {
   if (process.env.FLUENTD_SERVICE_HOST != null) return;
-  const container = await new GenericContainer(
-    'fluent/fluentd',
-    'v1.7.4-debian-1.0',
-  )
+  const container = await new GenericContainer('fluent/fluentd')
     .withName('fluentd_lb4')
     .withExposedPorts(24224, 9880)
     .withEnv('FLUENTD_CONF', 'fluentd.conf')
     .withBindMount(ETC_DIR, '/fluentd/etc', 'ro')
     .start();
-  process.env.FLUENTD_SERVICE_HOST = container.getContainerIpAddress();
+  process.env.FLUENTD_SERVICE_HOST = container.getHost();
   process.env.FLUENTD_SERVICE_PORT_TCP = container
     .getMappedPort(24224)
     .toString();

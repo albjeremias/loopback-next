@@ -20,7 +20,7 @@
 #
 # loopback4-example-shopping
 # - Primary owner(s): @hacksparrow
-# - Standby owner(s): @jannyHou
+# - Standby owner(s): @jannyHou @mrmodise @dougal83
 #
 # Connector core
 # - Primary owner(s): n/a
@@ -30,7 +30,7 @@
 #   - memory & kv-memory connectors in juggler
 #
 # OpenAPI connector
-# - Primary owner(s): n/a
+# - Primary owner(s): @raymondfeng
 # - Standby owner(s): n/a
 # - Repositories:
 #   - loopback-connector-openapi
@@ -82,7 +82,7 @@
 #   - loopback-connector-oracle
 
 # Fall-back entry for files not assigned to any Functional Areas
-* @bajtos @raymondfeng
+* @raymondfeng
 
 # To keep things simple, we don't assign any owners for the documentation.
 # When some doc pages are changed as part of a pull request changing the
@@ -122,6 +122,7 @@
 # - Standby owner(s): n/a
 /packages/core @raymondfeng
 /examples/rpc-server @raymondfeng
+/examples/webpack @raymondfeng
 /packages/cli/generators/observer @raymondfeng
 
 #
@@ -159,9 +160,9 @@
 #
 # - Issue label: OpenAPI
 # - Primary owner(s): @jannyHou
-# - Standby owner(s): @emonddr
+# - Standby owner(s): @emonddr @mschnee
 /packages/openapi-spec-builder @emonddr @jannyHou
-/packages/openapi-v3 @emonddr @jannyHou
+/packages/openapi-v3 @emonddr @jannyHou @mschnee
 /packages/rest/src/router/openapi-path.ts @emonddr @jannyHou
 /packages/rest/src/__tests__/unit/router/rebase-openapi-spec.unit.ts @emonddr @jannyHou
 /packages/rest/src/__tests__/unit/rest.server/rest.server.open-api-spec.unit.ts @emonddr @jannyHou
@@ -178,11 +179,11 @@
 #
 # - Issue label: Repository
 # - Primary owner(s): @agnes512
-# - Standby owner(s): @hacksparrow
+# - Standby owner(s): @hacksparrow @dougal83
 # Includes the following repos: loopback-datasource-juggler
 /packages/filter @agnes512 @hacksparrow
-/packages/repository @agnes512 @hacksparrow
-/packages/repository-json-schema @agnes512 @hacksparrow
+/packages/repository @agnes512 @hacksparrow @dougal83
+/packages/repository-json-schema @agnes512 @hacksparrow @dougal83
 /packages/repository-tests @agnes512 @hacksparrow
 /packages/cli/generators/repository @agnes512 @hacksparrow
 /packages/cli/generators/datasource @agnes512 @hacksparrow
@@ -234,9 +235,9 @@
 /packages/cli/generators/project @agnes512
 /packages/cli/generators/app @agnes512
 /packages/cli/generators/extension @agnes512
-/examples/todo @agnes512
+/examples/todo @agnes512 @nabdelgadir
 /examples/validation-app @dhmlau
-/docs/site/tutorials/todo @agnes512
+/docs/site/tutorials/todo @agnes512 @nabdelgadir
 
 #
 # Bootstrapper (core)
@@ -261,20 +262,20 @@
 # REST CRUD conventional API
 #
 # - Issue label: n/a
-# - Primary owner(s): @bajtos
+# - Primary owner(s): n/a
 # - Standby owner(s): @hacksparrow @nabdelgadir
-/packages/model-api-builder @bajtos @hacksparrow
-/packages/rest-crud @bajtos @nabdelgadir
-/examples/rest-crud @bajtos @nabdelgadir
+/packages/model-api-builder @hacksparrow
+/packages/rest-crud @nabdelgadir
+/examples/rest-crud @nabdelgadir
 
 #
 # Cloud Native tooling
 #
 # - Issue label: CloudNative
 # - Primary owner(s): @jannyHou @raymondfeng
-# - Standby owner(s): @emonddr
-/extensions/metrics @emonddr @jannyHou @raymondfeng
-/extensions/health @emonddr @jannyHou @raymondfeng
+# - Standby owner(s): @emonddr @nflaig
+/extensions/metrics @emonddr @jannyHou @raymondfeng @nflaig
+/extensions/health @emonddr @jannyHou @raymondfeng @nflaig
 /extensions/logging @emonddr @jannyHou @raymondfeng
 /examples/metrics-prometheus @emonddr @jannyHou @raymondfeng
 /acceptance/extension-logging-fluentd @emonddr @jannyHou @raymondfeng
@@ -284,11 +285,11 @@
 #
 # - Issue label: Authentication
 # - Primary owner(s): @hacksparrow
-# - Standby owner(s): @emonddr @jannyHou
-/packages/authentication @emonddr @hacksparrow @jannyHou
+# - Standby owner(s): @emonddr @jannyHou @Madaky @nflaig
+/packages/authentication @emonddr @hacksparrow @jannyHou @nflaig
 /packages/security @emonddr @hacksparrow @jannyHou
 /extensions/authentication-passport @emonddr @hacksparrow @jannyHou
-/extensions/authentication-jwt @emonddr @hacksparrow @jannyHou
+/extensions/authentication-jwt @emonddr @hacksparrow @jannyHou @Madaky
 /docs/site/tutorials/authentication @emonddr @hacksparrow @jannyHou
 /examples/passport-login @emonddr
 /examples/todo-jwt @dhmlau @jannyHou
@@ -333,6 +334,14 @@
 # - Standby owner(s): n/a
 /bodyparsers/rest-msgpack @achrinza
 
+# WebSocket/SockIO
+#
+# - Issue label: WebSocket
+# - Primary owner(s): @raymondfeng
+# - Standby owner(s): n/a
+/extensions/socketio @raymondfeng
+/examples/socketio @raymondfeng
+
 #
 # Build & internal tooling
 #
@@ -340,7 +349,8 @@
 # - Primary owner(s): @raymondfeng
 # - Standby owner(s): @emonddr
 /bin @emonddr @raymondfeng
-/packages/build @emonddr @raymondfeng
+/packages/build @emonddr @raymondfeng @achrinza
+/packages/monorepo @raymondfeng
 /packages/eslint-config @emonddr @raymondfeng
 /packages/tsdocs @emonddr @raymondfeng
 /fixtures/tsdocs-monorepo @emonddr @raymondfeng
@@ -351,18 +361,18 @@
 # Test helpers
 #
 # - Issue label: Testlab
-# - Primary owner(s): @bajtos
+# - Primary owner(s): n/a
 # - Standby owner(s): @agnes512
-/packages/testlab @bajtos @agnes512
-/packages/http-caching-proxy @bajtos @agnes512
+/packages/testlab @agnes512
+/packages/http-caching-proxy @agnes512
 
 #
 # Benchmarks
 #
 # - Issue label: n/a
-# - Primary owner(s): @bajtos
+# - Primary owner(s): n/a
 # - Standby owner(s): n/a
-/benchmark @bajtos
+# /benchmark
 
 #
 # PostgreSQL

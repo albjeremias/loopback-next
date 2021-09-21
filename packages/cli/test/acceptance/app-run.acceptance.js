@@ -28,44 +28,51 @@ const {skipIf} = require('@loopback/testlab');
  * a local machine, you can force this test to run by setting `CI` environment
  * variable.
  */
-skipIf(process.env.CI == null, describe, 'app-generator (SLOW)', function () {
+skipIf(process.env.CI == null, describe, 'app-generator (SLOW)', () => {
   const appProps = {
     name: '@loopback/sandbox-app',
     description: 'My sandbox app for LoopBack 4',
     outdir: path.join(sandboxDir, 'sandbox-app'),
   };
 
-  before('scaffold a new application', createAppProject);
-  /** @this {Mocha.Context} */
-  async function createAppProject() {
-    // Increase the timeout to 1 minute to accommodate slow CI build machines
-    this.timeout(60 * 1000);
-    await helpers
-      .run(appGenerator)
-      .inDir(appProps.outdir)
-      // Mark it private to prevent accidental npm publication
-      .withOptions({private: true})
-      .withPrompts(appProps);
-  }
+  before(
+    'scaffold a new application',
+    /** @this {Mocha.Context} */ function () {
+      // Increase the timeout to 1 minute to accommodate slow CI build machines
+      this.timeout(60 * 1000);
 
-  before('install dependencies', installDependencies);
-  /** @this {Mocha.Context} */
-  async function installDependencies() {
-    // Run `lerna bootstrap --scope @loopback/sandbox-app --include-filtered-dependencies`
-    // WARNING: It takes a while to run `lerna bootstrap`
-    this.timeout(15 * 60 * 1000);
-    process.chdir(rootDir);
-    await lernaBootstrap(null, appProps.name);
-  }
+      return (
+        helpers
+          .run(appGenerator)
+          .inDir(appProps.outdir)
+          // Mark it private to prevent accidental npm publication
+          .withOptions({private: true})
+          .withPrompts(appProps)
+      );
+    },
+  );
+
+  before(
+    'install dependencies',
+    /** @this {Mocha.Context} */ function () {
+      // Run `lerna bootstrap --scope @loopback/sandbox-app --include-filtered-dependencies`
+      // WARNING: It takes a while to run `lerna bootstrap`
+      this.timeout(15 * 60 * 1000);
+      process.chdir(rootDir);
+      return lernaBootstrap(null, appProps.name);
+    },
+  );
 
   it('passes `npm test` for the generated project', /** @this {Mocha.Context} */ function () {
     // Increase the timeout to 5 minutes,
     // the tests can take more than 2 seconds to run.
     this.timeout(5 * 60 * 1000);
 
-    return new Promise((resolve, reject) => {
+    // FixMe: NPM v7 does not run lifecycle scripts for some reason. To solve this problem, run `pretest`,`test` and `posttest` separately
+    // and should be run synchronous
+    return new Promise(resolve => {
       build
-        .runShell('npm', ['test'], {
+        .runShell('npm', ['run', 'pretest'], {
           // Disable stdout
           stdio: [process.stdin, 'ignore', process.stderr],
           cwd: appProps.outdir,
@@ -74,88 +81,129 @@ skipIf(process.env.CI == null, describe, 'app-generator (SLOW)', function () {
           assert.equal(code, 0);
           resolve();
         });
-    });
-  });
-
-  after(cleanup);
-  /** @this {Mocha.Context} */
-  function cleanup() {
-    // Increase the timeout to accommodate slow CI build machines
-    this.timeout(30 * 1000);
-
-    process.chdir(rootDir);
-    build.clean(['node', 'run-clean', appProps.outdir]);
-    process.chdir(process.cwd());
-  }
-});
-
-const isYarnAvailable = utils.isYarnAvailable();
-const yarnTest = isYarnAvailable ? describe : describe.skip;
-
-yarnTest('app-generator with Yarn (SLOW)', () => {
-  const appProps = {
-    name: '@loopback/sandbox-yarn-app',
-    description: 'My sandbox app with Yarn for LoopBack 4',
-    outdir: path.join(sandboxDir, 'sandbox-yarn-app'),
-  };
-
-  before('scaffold a new application', createAppProject);
-  /** @this {Mocha.Context} */
-  async function createAppProject() {
-    // Increase the timeout to 1 minute to accommodate slow CI build machines
-    this.timeout(60 * 1000);
-    await helpers
-      .run(appGenerator)
-      .inDir(appProps.outdir)
-      // Mark it private to prevent accidental npm publication
-      .withOptions({
-        applicationName: 'YarnApp',
-        packageManager: 'yarn',
-        private: true,
+    })
+      .then(() => {
+        return new Promise(resolve => {
+          build
+            .runShell('npm', ['test', '--ignore-scripts'], {
+              // Disable stdout
+              stdio: [process.stdin, 'ignore', process.stderr],
+              cwd: appProps.outdir,
+            })
+            .on('close', code => {
+              assert.equal(code, 0);
+              resolve();
+            });
+        });
       })
-      .withPrompts(appProps);
-  }
-
-  before('install dependencies', installDependencies);
-  /** @this {Mocha.Context} */
-  async function installDependencies() {
-    // Run `lerna bootstrap --scope @loopback/sandbox-app --include-filtered-dependencies`
-    // WARNING: It takes a while to run `lerna bootstrap`
-    this.timeout(15 * 60 * 1000);
-    process.chdir(rootDir);
-    await lernaBootstrap('yarn', appProps.name);
-  }
-
-  it('passes `yarn test` for the generated project', /** @this {Mocha.Context} */ function () {
-    // Increase the timeout to 5 minutes,
-    // the tests can take more than 2 seconds to run.
-    this.timeout(5 * 60 * 1000);
-
-    return new Promise((resolve, reject) => {
-      build
-        .runShell('yarn', ['test'], {
-          // Disable stdout
-          stdio: [process.stdin, 'ignore', process.stderr],
-          cwd: appProps.outdir,
-        })
-        .on('close', code => {
-          assert.equal(code, 0);
-          resolve();
+      .then(() => {
+        return new Promise(resolve => {
+          build
+            .runShell('npm', ['run', 'posttest'], {
+              // Disable stdout
+              stdio: [process.stdin, 'ignore', process.stderr],
+              cwd: appProps.outdir,
+            })
+            .on('close', code => {
+              assert.equal(code, 0);
+              resolve();
+            });
         });
-    });
+      });
   });
 
-  after(cleanup);
-  /** @this {Mocha.Context} */
-  function cleanup() {
-    // Increase the timeout to accommodate slow CI build machines
-    this.timeout(30 * 1000);
+  after(
+    /** @this {Mocha.Context} */ function () {
+      // Increase the timeout to accommodate slow CI build machines
+      this.timeout(30 * 1000);
 
-    process.chdir(rootDir);
-    build.clean(['node', 'run-clean', appProps.outdir]);
-    process.chdir(process.cwd());
-  }
+      process.chdir(rootDir);
+      build.clean(['node', 'run-clean', appProps.outdir]);
+      process.chdir(process.cwd());
+    },
+  );
 });
+
+/**
+ * We use `CI` environment variable to control if the test should be run. In
+ * a CI system, the flag is always set and the test will always be run. On
+ * a local machine, you can force this test to run by setting `CI` environment
+ * variable.
+ */
+skipIf(
+  process.env.CI == null || !utils.isYarnAvailable(),
+  describe,
+  'app-generator with Yarn (SLOW)',
+  () => {
+    const appProps = {
+      name: '@loopback/sandbox-yarn-app',
+      description: 'My sandbox app with Yarn for LoopBack 4',
+      outdir: path.join(sandboxDir, 'sandbox-yarn-app'),
+    };
+
+    before(
+      'scaffold a new application',
+      /** @this {Mocha.Context} */ function () {
+        // Increase the timeout to 1 minute to accommodate slow CI build machines
+        this.timeout(60 * 1000);
+
+        return (
+          helpers
+            .run(appGenerator)
+            .inDir(appProps.outdir)
+            // Mark it private to prevent accidental npm publication
+            .withOptions({
+              applicationName: 'YarnApp',
+              packageManager: 'yarn',
+              private: true,
+            })
+            .withPrompts(appProps)
+        );
+      },
+    );
+
+    before(
+      'install dependencies',
+      /** @this {Mocha.Context} */ function () {
+        // Run `lerna bootstrap --scope @loopback/sandbox-app --include-filtered-dependencies`
+        // WARNING: It takes a while to run `lerna bootstrap`
+        this.timeout(15 * 60 * 1000);
+        process.chdir(rootDir);
+        return lernaBootstrap('yarn', appProps.name);
+      },
+    );
+
+    it('passes `yarn test` for the generated project', /** @this {Mocha.Context} */ function () {
+      // Increase the timeout to 5 minutes,
+      // the tests can take more than 2 seconds to run.
+      this.timeout(5 * 60 * 1000);
+
+      return new Promise(resolve => {
+        build
+          .runShell('yarn', ['test'], {
+            // Disable stdout
+            stdio: [process.stdin, 'ignore', process.stderr],
+            cwd: appProps.outdir,
+          })
+          .on('close', code => {
+            assert.equal(code, 0);
+            resolve();
+          });
+      });
+    });
+
+    after(
+      /** @this {Mocha.Context} */ function () {
+        // Increase the timeout to accommodate slow CI build machines
+        this.timeout(30 * 1000);
+
+        process.chdir(rootDir);
+        build.clean(['node', 'run-clean', appProps.outdir]);
+        process.chdir(process.cwd());
+      },
+    );
+  },
+);
 
 async function lernaBootstrap(packageManager, ...scopes) {
   const cmd = bootstrapCommandFactory({

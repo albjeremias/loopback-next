@@ -11,14 +11,14 @@ summary:
 
 Starting with a [model class](Model.md) and [datasource](DataSource.md),
 LoopBack 4 allows you to easily use CRUD REST APIs by convention through
-[`@loopback/rest-crud`](https://github.com/strongloop/loopback-next/tree/master/packages/rest-crud).
+[`@loopback/rest-crud`](https://github.com/loopbackio/loopback-next/tree/master/packages/rest-crud).
 The package allows the application to use a default CRUD repository and
 controller class without creating a custom class for either.
 
 The
-[`rest-crud` example](https://github.com/strongloop/loopback-next/tree/master/examples/rest-crud)
+[`rest-crud` example](https://github.com/loopbackio/loopback-next/tree/master/examples/rest-crud)
 is a simplified version of the
-[`Todo` example](https://github.com/strongloop/loopback-next/tree/master/examples/todo)
+[`Todo` example](https://github.com/loopbackio/loopback-next/tree/master/examples/todo)
 that uses `@loopback/rest-crud`. To see the `rest-crud` example, use the
 following command:
 
@@ -158,7 +158,7 @@ module.exports = <ModelCrudRestApiConfig>{
 Under the hood, a default CRUD controller and repository are created using
 [`defineCrudControllerClass`](https://loopback.io/doc/en/lb4/apidocs.rest-crud.definecrudrestcontroller.html)
 and
-[`defineCrudRepositoryClass`](https://loopback.io/doc/en/lb4/apidocs.rest-crud.definecrudrepositoryclass.html),
+[`defineCrudRepositoryClass`](https://loopback.io/doc/en/lb4/apidocs.repository.definecrudrepositoryclass.html),
 respectively. These two functions can also be used at the application level. For
 example:
 

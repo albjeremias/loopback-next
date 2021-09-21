@@ -4,12 +4,11 @@ An example repo showing how to write a complex log extension for LoopBack 4
 
 ## Overview
 
-This repository shows you how to use
-[@loopback/cli](https://github.com/strongloop/loopback-next/tree/master/packages/cli)
-to write a complex logging extension that requires a
-[Components](http://loopback.io/doc/en/lb4/Components.html),
+This repository shows you how to write a complex logging extension that requires
+a [Components](http://loopback.io/doc/en/lb4/Components.html),
 [Decorator](http://loopback.io/doc/en/lb4/Decorators.html), and a
-[Mixin](http://loopback.io/doc/en/lb4/Mixin.html).
+[Mixin](http://loopback.io/doc/en/lb4/Mixin.html) using
+[@loopback/cli](https://github.com/loopbackio/loopback-next/tree/master/packages/cli).
 
 To use this extension you can add the `LogMixin` to your Application which will
 provide you a function to set the Application wide log level as well as
@@ -91,9 +90,8 @@ user (for this extension that'll be the logLevel `enum`).
  * Binding keys used by this component.
  */
 export namespace EXAMPLE_LOG_BINDINGS {
-  export const APP_LOG_LEVEL = BindingKey.create<LOG_LEVEL>(
-    'example.log.level',
-  );
+  export const APP_LOG_LEVEL =
+    BindingKey.create<LOG_LEVEL>('example.log.level');
   export const TIMER = BindingKey.create<TimerFn>('example.log.timer');
   export const LOGGER = BindingKey.create<LogWriterFn>('example.log.logger');
   export const LOG_ACTION = BindingKey.create<LogFn>('example.log.action');
@@ -437,8 +435,8 @@ well as an extension acceptance test which tests the entire extension as a whole
 
 ## Contributions
 
-- [Guidelines](https://github.com/strongloop/loopback-next/blob/master/docs/CONTRIBUTING.md)
-- [Join the team](https://github.com/strongloop/loopback-next/issues/110)
+- [Guidelines](https://github.com/loopbackio/loopback-next/blob/master/docs/CONTRIBUTING.md)
+- [Join the team](https://github.com/loopbackio/loopback-next/issues/110)
 
 ## Tests
 
@@ -447,7 +445,7 @@ Run `npm test` from the root folder.
 ## Contributors
 
 See
-[all contributors](https://github.com/strongloop/loopback-next/graphs/contributors).
+[all contributors](https://github.com/loopbackio/loopback-next/graphs/contributors).
 
 ## License
 

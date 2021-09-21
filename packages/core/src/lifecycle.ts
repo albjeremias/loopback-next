@@ -15,20 +15,25 @@ import {
 import {CoreTags} from './keys';
 
 /**
- * Observers to handle life cycle start/stop events
+ * Observers to handle life cycle init/start/stop events
  */
 export interface LifeCycleObserver {
   /**
+   * The method to be invoked during `init`. It will only be called at most once
+   * for a given application instance.
+   */
+  init?(...injectedArgs: unknown[]): ValueOrPromise<void>;
+  /**
    * The method to be invoked during `start`
    */
-  start?(): ValueOrPromise<void>;
+  start?(...injectedArgs: unknown[]): ValueOrPromise<void>;
   /**
    * The method to be invoked during `stop`
    */
-  stop?(): ValueOrPromise<void>;
+  stop?(...injectedArgs: unknown[]): ValueOrPromise<void>;
 }
 
-const lifeCycleMethods: (keyof LifeCycleObserver)[] = ['start', 'stop'];
+const lifeCycleMethods: (keyof LifeCycleObserver)[] = ['init', 'start', 'stop'];
 
 /**
  * Test if an object implements LifeCycleObserver

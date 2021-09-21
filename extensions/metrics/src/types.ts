@@ -5,6 +5,9 @@
 
 import {DefaultMetricsCollectorConfiguration} from 'prom-client';
 
+/**
+ * Options for metrics component
+ */
 export interface MetricsOptions {
   endpoint?: {
     disabled?: boolean;
@@ -15,16 +18,33 @@ export interface MetricsOptions {
     disabled?: boolean;
   } & DefaultMetricsCollectorConfiguration;
 
+  defaultLabels?: {
+    [labelName: string]: string;
+  };
+
   pushGateway?: {
     disabled?: boolean;
     url: string;
     interval?: number;
+    jobName?: string;
+    groupingKey?: {
+      [key: string]: string;
+    };
+    replaceAll?: boolean;
   };
+
+  openApiSpec?: boolean;
 }
+
+/**
+ * Configuration for metrics component with optional properties
+ */
+export type MetricsConfig = Partial<MetricsOptions>;
 
 export const DEFAULT_METRICS_OPTIONS: MetricsOptions = {
   endpoint: {
     basePath: '/metrics',
   },
   defaultMetrics: {},
+  openApiSpec: false,
 };

@@ -69,7 +69,7 @@ schema migrations are silently skipped.
 
 In the future, we would like to provide finer-grained control of database schema
 updates, learn more in the GitHub issue
-[#487 Database Migration Management Framework](https://github.com/strongloop/loopback-next/issues/487)
+[#487 Database Migration Management Framework](https://github.com/loopbackio/loopback-next/issues/487)
 
 ### Auto-update database at start
 
@@ -100,7 +100,7 @@ It's usually better to have more control about the database migration and
 trigger the updates explicitly. To do so, projects scaffolded using `lb4 app`
 come with a custom CLI script `src/migrate.ts` to run schema migration. Check
 out e.g.
-[Todo example app](https://github.com/strongloop/loopback-next/blob/master/examples/todo/src/migrate.ts)
+[Todo example app](https://github.com/loopbackio/loopback-next/blob/master/examples/todo/src/migrate.ts)
 to see the full source code of the script.
 
 Besides the migration CLI, new projects come with a handy npm script to run the
@@ -126,6 +126,34 @@ The migration process consists of two steps now:
    ```sh
    $ npm run migrate -- --rebuild
    ```
+
+### Skipping a dataSource for migration
+
+In some cases you do not want specific datasource(s) to be included in the
+migration process. For example, depending on the `process.env.NODE_ENV` you
+might be restricted to ALL or specific datasources from altering the table
+schemas.
+
+For such scenarios, you can include the property `disableMigration` in the
+datasource configuration. The Datasource will only be skipped from the migration
+process if you set it to`true`.
+
+If you do not include it or if you set it to `false` then your datasource will
+be migrated, this is to provide a non-breaking change with this new property.
+
+The example below shows how to do so in our Todo example application.
+
+{% include code-caption.html content="src/datasources/db.datasource.ts" %}
+
+```ts
+const config = {
+  name: 'db',
+  connector: 'memory',
+  localStorage: '',
+  file: './data/db.json',
+  disableMigration: true,
+};
+```
 
 ### Implement additional migration steps
 

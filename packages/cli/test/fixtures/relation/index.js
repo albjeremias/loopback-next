@@ -33,28 +33,6 @@ const SourceEntries = {
     content: readSourceFile('./repositories/customer.repository.ts'),
   },
 
-  CustomerClassModel: {
-    path: MODEL_APP_PATH,
-    file: 'customer-class.model.ts',
-    content: readSourceFile('./models/customer-class.model.ts'),
-  },
-  CustomerClassRepository: {
-    path: REPOSITORY_APP_PATH,
-    file: 'customer-class.repository.ts',
-    content: readSourceFile('./repositories/customer-class.repository.ts'),
-  },
-
-  CustomerClassTypeModel: {
-    path: MODEL_APP_PATH,
-    file: 'customer-class-type.model.ts',
-    content: readSourceFile('./models/customer-class-type.model.ts'),
-  },
-  CustomerClassTypeRepository: {
-    path: REPOSITORY_APP_PATH,
-    file: 'customer-class-type.repository.ts',
-    content: readSourceFile('./repositories/customer-class-type.repository.ts'),
-  },
-
   OrderModel: {
     path: MODEL_APP_PATH,
     file: 'order.model.ts',
@@ -70,27 +48,25 @@ const SourceEntries = {
     file: 'order.repository.ts',
     content: readSourceFile('./repositories/order.repository.ts'),
   },
-
-  OrderClassModel: {
+  CustomerModelWithInheritance: {
     path: MODEL_APP_PATH,
-    file: 'order-class.model.ts',
-    content: readSourceFile('./models/order-class.model.ts'),
+    file: 'customer-inheritance.model.ts',
+    content: readSourceFile('./models/customer-inhe.model.ts'),
   },
-  OrderClassRepository: {
+  CustomerInheRepository: {
     path: REPOSITORY_APP_PATH,
-    file: 'order-class.repository.ts',
-    content: readSourceFile('./repositories/order-class.repository.ts'),
+    file: 'customer-inheritance.repository.ts',
+    content: readSourceFile('./repositories/customer-inhe.repository.ts'),
   },
-
-  OrderClassTypeModel: {
+  OrderModelModelWithInheritance: {
     path: MODEL_APP_PATH,
-    file: 'order-class-type.model.ts',
-    content: readSourceFile('./models/order-class-type.model.ts'),
+    file: 'order-inheritance.model.ts',
+    content: readSourceFile('./models/order-inhe.model.ts'),
   },
-  OrderClassTypeRepository: {
+  OrderInheRepository: {
     path: REPOSITORY_APP_PATH,
-    file: 'order-class-type.repository.ts',
-    content: readSourceFile('./repositories/order-class-type.repository.ts'),
+    file: 'order-inheritance.repository.ts',
+    content: readSourceFile('./repositories/order-inhe.repository.ts'),
   },
 
   AddressModel: {
@@ -107,40 +83,6 @@ const SourceEntries = {
     path: REPOSITORY_APP_PATH,
     file: 'address.repository.ts',
     content: readSourceFile('./repositories/address.repository.ts'),
-  },
-
-  AddressClassModel: {
-    path: MODEL_APP_PATH,
-    file: 'address-class.model.ts',
-    content: readSourceFile('./models/address-class.model.ts'),
-  },
-  AddressClassRepository: {
-    path: REPOSITORY_APP_PATH,
-    file: 'address-class.repository.ts',
-    content: readSourceFile('./repositories/address-class.repository.ts'),
-  },
-
-  AddressClassTypeModel: {
-    path: MODEL_APP_PATH,
-    file: 'address-class-type.model.ts',
-    content: readSourceFile('./models/address-class-type.model.ts'),
-  },
-  AddressClassTypeRepository: {
-    path: REPOSITORY_APP_PATH,
-    file: 'address-class-type.repository.ts',
-    content: readSourceFile('./repositories/address-class-type.repository.ts'),
-  },
-
-  NoKeyModel: {
-    path: MODEL_APP_PATH,
-    file: 'no-key.model.ts',
-    content: readSourceFile('./models/no-key.model.ts'),
-  },
-
-  NoKeyRepository: {
-    path: REPOSITORY_APP_PATH,
-    file: 'no-key.repository.ts',
-    content: readSourceFile('./repositories/no-key.repository.ts'),
   },
 
   NoRepoModel: {
@@ -236,13 +178,6 @@ exports.SANDBOX_FILES = [
   SourceEntries.CustomerRepository,
   SourceEntries.OrderRepository,
   SourceEntries.AddressRepository,
-  SourceEntries.CustomerClassRepository,
-  SourceEntries.OrderClassRepository,
-  SourceEntries.AddressClassRepository,
-  SourceEntries.CustomerClassTypeRepository,
-  SourceEntries.OrderClassTypeRepository,
-  SourceEntries.AddressClassTypeRepository,
-  SourceEntries.NoKeyRepository,
   SourceEntries.DoctorRepository,
   SourceEntries.PatientRepository,
   SourceEntries.AppointmentRepository,
@@ -250,14 +185,7 @@ exports.SANDBOX_FILES = [
   SourceEntries.CustomerModel,
   SourceEntries.OrderModel,
   SourceEntries.AddressModel,
-  SourceEntries.NoKeyModel,
   SourceEntries.NoRepoModel,
-  SourceEntries.CustomerClassModel,
-  SourceEntries.OrderClassModel,
-  SourceEntries.AddressClassModel,
-  SourceEntries.CustomerClassTypeModel,
-  SourceEntries.OrderClassTypeModel,
-  SourceEntries.AddressClassTypeModel,
   SourceEntries.DoctorModel,
   SourceEntries.PatientModel,
   SourceEntries.AppointmentModel,
@@ -266,28 +194,20 @@ exports.SANDBOX_FILES = [
 
 exports.SANDBOX_FILES2 = [
   SourceEntries.CustomerRepository,
+  SourceEntries.CustomerInheRepository,
   SourceEntries.OrderRepository,
+  SourceEntries.OrderInheRepository,
   SourceEntries.AddressRepository,
-  SourceEntries.CustomerClassRepository,
-  SourceEntries.OrderClassRepository,
-  SourceEntries.AddressClassRepository,
-  SourceEntries.CustomerClassTypeRepository,
-  SourceEntries.OrderClassTypeRepository,
-  SourceEntries.AddressClassTypeRepository,
-  SourceEntries.NoKeyRepository,
   SourceEntries.DoctorRepository,
   SourceEntries.PatientRepository,
   SourceEntries.AppointmentRepository,
 
   SourceEntries.CustomerModel,
+  SourceEntries.CustomerModelWithInheritance,
   SourceEntries.OrderModel,
+  SourceEntries.OrderModelModelWithInheritance,
   SourceEntries.AddressModel,
-  SourceEntries.NoKeyModel,
   SourceEntries.NoRepoModel,
-  SourceEntries.CustomerClassModel,
-  SourceEntries.OrderClassModel,
-  SourceEntries.AddressClassModel,
-  SourceEntries.CustomerClassTypeModel,
   SourceEntries.DoctorModel,
   SourceEntries.PatientModel,
   SourceEntries.AppointmentModel,

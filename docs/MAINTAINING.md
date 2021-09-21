@@ -28,6 +28,11 @@ http://loopback.io/doc/en/contrib/Governance.html. This means mostly:
   take a look at issues and pull requests related to code you contributed
   yourself.
 
+Please look for community members that are actively involved with the project
+and consider nominating them to become maintainers too. See
+[Nominating new maintainers](https://github.com/loopbackio/loopback-governance/blob/master/docs/maintainer-nomination.md)
+for more information.
+
 ## More questions?
 
 **Q: Now that I have rights to merge pull requests, how many approvals from
@@ -35,7 +40,7 @@ other maintainers before I can merge?**
 
 A: If the changes are straightforward and you're confident about the changes,
 please go ahead to merge it. Otherwise you can always mention
-[@strongloop/loopback-maintainers](https://github.com/orgs/strongloop/teams/loopback-maintainers)
+[@loopbackio/loopback-maintainers](https://github.com/orgs/loopbackio/teams/loopback-maintainers)
 in the GitHub issues/pull requests.
 
 **Q: If I have questions/suggestions on the contribution process, what should I

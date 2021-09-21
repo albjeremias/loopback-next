@@ -11,11 +11,11 @@ This application exposes `POST /files` endpoint that accepts
 
 ## Key artifacts
 
-- [FileUploadController](src/controllers/files.controller.ts)
+- [FileUploadController](src/controllers/file-upload.controller.ts)
 
   - Expose `POST /files` endpoint to allow file uploads
 
-- [FileUploadService - an Express middleware from multer](src/services/files.service.ts)
+- [FileUploadService - an Express middleware from multer](src/services/file-upload.service.ts)
 
   - A service provider that returns a configured `multer` request handler
 
@@ -37,7 +37,7 @@ This application exposes `POST /files` endpoint that accepts
     this.configure(FILE_UPLOAD_SERVICE).to(multerOptions);
     ```
 
-- [FileDownloadController](src/controllers/files.controller.ts)
+- [FileDownloadController](src/controllers/file-download.controller.ts)
 
   - Expose `GET /files` endpoint to list uploaded files
   - Expose `GET /files/{filename}` endpoint to download a file
@@ -61,8 +61,8 @@ application root directory. The directory can be configured via
 
 ## Contributions
 
-- [Guidelines](https://github.com/strongloop/loopback-next/blob/master/docs/CONTRIBUTING.md)
-- [Join the team](https://github.com/strongloop/loopback-next/issues/110)
+- [Guidelines](https://github.com/loopbackio/loopback-next/blob/master/docs/CONTRIBUTING.md)
+- [Join the team](https://github.com/loopbackio/loopback-next/issues/110)
 
 ## Tests
 
@@ -71,7 +71,7 @@ Run `npm test` from the root folder.
 ## Contributors
 
 See
-[all contributors](https://github.com/strongloop/loopback-next/graphs/contributors).
+[all contributors](https://github.com/loopbackio/loopback-next/graphs/contributors).
 
 ## License
 

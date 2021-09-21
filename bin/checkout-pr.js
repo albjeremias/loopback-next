@@ -22,7 +22,7 @@ const build = require('../packages/build');
 const path = require('path');
 const rootDir = path.join(__dirname, '..');
 
-async function main() {
+async function checkoutPR() {
   const prUrlOrNum = process.argv[2];
   if (!prUrlOrNum) {
     console.error(
@@ -37,7 +37,7 @@ async function main() {
 
   console.log(`Checking out pull request #${prNum}...`);
 
-  const url = `https://api.github.com/repos/strongloop/loopback-next/pulls/${prNum}`;
+  const url = `https://api.github.com/repos/loopbackio/loopback-next/pulls/${prNum}`;
 
   const result = await getPRInfo(url);
   const headUrl = result.head.repo.ssh_url;
@@ -56,6 +56,7 @@ async function main() {
 
 const https = require('https');
 const url = require('url');
+const {runMain} = require('../packages/monorepo');
 
 /**
  * Fetch PR information
@@ -146,7 +147,4 @@ console.log('| Check out GitHub CLI - https://cli.github.com |');
 console.log('+-----------------------------------------------+');
 console.log();
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+runMain(module, checkoutPR);

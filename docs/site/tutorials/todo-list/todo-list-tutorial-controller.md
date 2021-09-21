@@ -40,7 +40,7 @@ Controller TodoList was created in src/controllers/
 ```
 
 To view the completed file, see the
-[`TodoList` example](https://github.com/strongloop/loopback-next/blob/master/examples/todo-list/src/controllers/todo-list.controller.ts).
+[`TodoList` example](https://github.com/loopbackio/loopback-next/blob/master/examples/todo-list/src/controllers/todo-list.controller.ts).
 
 And voilà! We now have a set of basic APIs for todo-lists, just like that!
 
@@ -143,7 +143,7 @@ endpoint `/todo-lists/{id}/todos`, which we'll see in the
 As `src/controllers/todo-todo-list.controller.ts` only contains one method, we
 can move it to the `Todo` controller and delete that file:
 
-{% include code-caption.html content="src/models/todo.controller.ts" %}
+{% include code-caption.html content="src/controllers/todo.controller.ts" %}
 
 ```ts
 export class TodoController {
@@ -182,6 +182,9 @@ $ npm start
 Server is running at http://127.0.0.1:3000
 ```
 
+{% include note.html content="
+When using the API Explorer, be sure to clear out any default <i><b>filter</b></i> or <i><b>where</b></i> objects in order to see all the data." %}
+
 Here are some new requests you can try out:
 
 - `POST /todo-lists` with a body of `{ "title": "grocery list" }`.
@@ -192,12 +195,9 @@ Here are some new requests you can try out:
 - `GET /todo-lists/{id}/todos` with the ID from before, and see if you get the
   todo you created from before.
 - `GET /todo-lists/{id}` with the ID from before, with the following filter
-  `{include: [{relation: 'todos'}]}`, and see if you get a `todos` property with
-  the todo created before. **Note**: this filter won't work through the API
-  explorer (See this
-  [GitHub issue](https://github.com/strongloop/loopback-next/issues/2208) for
-  details). Use the following url to test this endpoint (remember to replace
-  `{id}` with the ID from before):
+  `{"include": [{"relation": "todos"}]}`, and see if you get a `todos` property
+  with the todo created before. You can also use the following url to test this
+  endpoint (remember to replace `{id}` with the ID from before):
   http://localhost:3000/todo-lists/{id}?filter[include][][relation]=todos
 
 And there you have it! You now have the power to define APIs for related models!

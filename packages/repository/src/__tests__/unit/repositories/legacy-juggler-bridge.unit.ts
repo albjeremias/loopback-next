@@ -4,6 +4,7 @@
 // License text available at https://opensource.org/licenses/MIT
 
 import {expect, toJSON} from '@loopback/testlab';
+import {cloneDeep} from 'lodash';
 import {
   bindModel,
   DefaultCrudRepository,
@@ -263,41 +264,73 @@ describe('DefaultCrudRepository', () => {
     expect(notes.length).to.eql(2);
   });
 
-  it('implements Repository.find()', async () => {
-    const repo = new DefaultCrudRepository(Note, ds);
-    await repo.createAll([
-      {title: 't1', content: 'c1'},
-      {title: 't2', content: 'c2'},
-    ]);
-    const notes = await repo.find({where: {title: 't1'}});
-    expect(notes.length).to.eql(1);
+  describe('find', () => {
+    it('is implemented', async () => {
+      const repo = new DefaultCrudRepository(Note, ds);
+      await repo.createAll([
+        {title: 't1', content: 'c1'},
+        {title: 't2', content: 'c2'},
+      ]);
+      const notes = await repo.find({where: {title: 't1'}});
+      expect(notes.length).to.eql(1);
+    });
+
+    it('does not manipulate the original filter', async () => {
+      const repo = new DefaultCrudRepository(Note, ds);
+      const filter = {where: {title: 't1'}};
+      const originalFilter = cloneDeep(filter);
+      await repo.createAll([
+        {title: 't1', content: 'c1'},
+        {title: 't2', content: 'c2'},
+      ]);
+      await repo.find(filter);
+      expect(filter).to.deepEqual(originalFilter);
+    });
   });
 
-  it('implements Repository.findOne()', async () => {
-    const repo = new DefaultCrudRepository(Note, ds);
-    await repo.createAll([
-      {title: 't1', content: 'c1'},
-      {title: 't1', content: 'c2'},
-    ]);
-    const note = await repo.findOne({
-      where: {title: 't1'},
-      order: ['content DESC'],
+  describe('findOne', () => {
+    it('is implemented', async () => {
+      const repo = new DefaultCrudRepository(Note, ds);
+      await repo.createAll([
+        {title: 't1', content: 'c1'},
+        {title: 't1', content: 'c2'},
+      ]);
+      const note = await repo.findOne({
+        where: {title: 't1'},
+        order: ['content DESC'],
+      });
+      expect(note).to.not.be.null();
+      expect(note?.title).to.eql('t1');
+      expect(note?.content).to.eql('c2');
     });
-    expect(note).to.not.be.null();
-    expect(note?.title).to.eql('t1');
-    expect(note?.content).to.eql('c2');
-  });
-  it('returns null if Repository.findOne() does not return a value', async () => {
-    const repo = new DefaultCrudRepository(Note, ds);
-    await repo.createAll([
-      {title: 't1', content: 'c1'},
-      {title: 't1', content: 'c2'},
-    ]);
-    const note = await repo.findOne({
-      where: {title: 't5'},
-      order: ['content DESC'],
+
+    it('returns null if instances were found', async () => {
+      const repo = new DefaultCrudRepository(Note, ds);
+      await repo.createAll([
+        {title: 't1', content: 'c1'},
+        {title: 't1', content: 'c2'},
+      ]);
+      const note = await repo.findOne({
+        where: {title: 't5'},
+        order: ['content DESC'],
+      });
+      expect(note).to.be.null();
     });
-    expect(note).to.be.null();
+
+    it('does not manipulate the original filter', async () => {
+      const repo = new DefaultCrudRepository(Note, ds);
+      const filter = {
+        where: {title: 't5'},
+        order: ['content DESC'],
+      };
+      const originalFilter = cloneDeep(filter);
+      await repo.createAll([
+        {title: 't1', content: 'c1'},
+        {title: 't1', content: 'c2'},
+      ]);
+      await repo.findOne(filter);
+      expect(filter).to.deepEqual(originalFilter);
+    });
   });
 
   describe('findById', () => {
@@ -313,6 +346,15 @@ describe('DefaultCrudRepository', () => {
       const note = await repo.create({title: 'a-title', content: 'a-content'});
       const result = await repo.findById(note.id, {fields: {title: true}});
       expect(result?.toJSON()).to.eql({title: 'a-title'});
+    });
+
+    it('does not manipulate the original filter', async () => {
+      const repo = new DefaultCrudRepository(Note, ds);
+      const filter = {fields: {title: true, content: true}};
+      const originalFilter = cloneDeep(filter);
+      const note = await repo.create({title: 'a-title', content: 'a-content'});
+      await repo.findById(note.id, filter);
+      expect(filter).to.deepEqual(originalFilter);
     });
 
     it('throws when the instance does not exist', async () => {
@@ -425,7 +467,7 @@ describe('DefaultCrudRepository', () => {
 
         folderRepo.registerInclusionResolver('files', hasManyResolver);
 
-        const folders = await folderRepo.find({include: [{relation: 'files'}]});
+        const folders = await folderRepo.find({include: ['files']});
 
         expect(toJSON(folders)).to.deepEqual([
           {...createdFolders[0].toJSON(), files: [toJSON(files[0])]},
@@ -447,7 +489,7 @@ describe('DefaultCrudRepository', () => {
         fileRepo.registerInclusionResolver('folder', belongsToResolver);
 
         const file = await fileRepo.findById(1, {
-          include: [{relation: 'folder'}],
+          include: ['folder'],
         });
 
         expect(file.toJSON()).to.deepEqual({
@@ -470,7 +512,7 @@ describe('DefaultCrudRepository', () => {
         folderRepo.registerInclusionResolver('author', hasOneResolver);
 
         const folder = await folderRepo.findOne({
-          include: [{relation: 'author'}],
+          include: ['author'],
         });
 
         expect(folder!.toJSON()).to.deepEqual({
@@ -512,46 +554,40 @@ describe('DefaultCrudRepository', () => {
       );
 
       // stub resolvers
-      const hasManyResolver: InclusionResolver<
-        Folder,
-        File
-      > = async entities => {
-        const files = [];
-        for (const entity of entities) {
-          const file = await folderFiles(entity.id).find();
-          files.push(file);
-        }
+      const hasManyResolver: InclusionResolver<Folder, File> =
+        async entities => {
+          const files = [];
+          for (const entity of entities) {
+            const file = await folderFiles(entity.id).find();
+            files.push(file);
+          }
 
-        return files;
-      };
+          return files;
+        };
 
-      const belongsToResolver: InclusionResolver<
-        File,
-        Folder
-      > = async entities => {
-        const folders = [];
+      const belongsToResolver: InclusionResolver<File, Folder> =
+        async entities => {
+          const folders = [];
 
-        for (const file of entities) {
-          const folder = await fileFolder(file.folderId);
-          folders.push(folder);
-        }
+          for (const file of entities) {
+            const folder = await fileFolder(file.folderId);
+            folders.push(folder);
+          }
 
-        return folders;
-      };
+          return folders;
+        };
 
-      const hasOneResolver: InclusionResolver<
-        Folder,
-        Author
-      > = async entities => {
-        const authors = [];
+      const hasOneResolver: InclusionResolver<Folder, Author> =
+        async entities => {
+          const authors = [];
 
-        for (const folder of entities) {
-          const author = await folderAuthor(folder.id).get();
-          authors.push(author);
-        }
+          for (const folder of entities) {
+            const author = await folderAuthor(folder.id).get();
+            authors.push(author);
+          }
 
-        return authors;
-      };
+          return authors;
+        };
     });
   });
 

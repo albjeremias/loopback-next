@@ -8,7 +8,7 @@ permalink: /doc/en/lb4/migration-models-mixins.html
 ---
 
 {% include tip.html content="
-Missing instructions for your LoopBack 3 use case? Please report a [Migration docs issue](https://github.com/strongloop/loopback-next/issues/new?labels=question,Migration,Docs&template=Migration_docs.md) on GitHub to let us know.
+Missing instructions for your LoopBack 3 use case? Please report a [Migration docs issue](https://github.com/loopbackio/loopback-next/issues/new?labels=question,Migration,Docs&template=Migration_docs.md) on GitHub to let us know.
 " %}
 
 ## Introduction
@@ -149,7 +149,7 @@ export class BaseEntity extends Entity {}
 ```
 
 This is necessary because the
-[Entity](https://github.com/strongloop/loopback-next/blob/master/packages/repository/src/model.ts#L276)
+[Entity](https://github.com/loopbackio/loopback-next/blob/master/packages/repository/src/model.ts#L276)
 class is abstract and doesn't have a constructor.
 
 #### Defining The Model Property Mixin Class Factory Function
@@ -161,7 +161,7 @@ This mixin class factory function `AddCategoryPropertyMixin` in
 {% include code-caption.html content="src/mixins/category-property-mixin.ts" %}
 
 ```ts
-import {Constructor} from '@loopback/core';
+import {MixinTarget} from '@loopback/core';
 import {property, Model} from '@loopback/repository';
 
 /**
@@ -433,7 +433,7 @@ method to any repository.
 {% include code-caption.html content="src/mixins/find-by-title-repository-mixin.ts" %}
 
 ```ts
-import {Constructor} from '@loopback/core';
+import {MixinTarget} from '@loopback/core';
 import {Model, CrudRepository, Where} from '@loopback/repository';
 import {FindByTitle} from './find-by-title-interface';
 
@@ -448,7 +448,7 @@ import {FindByTitle} from './find-by-title-interface';
  */
 export function FindByTitleRepositoryMixin<
   M extends Model & {title: string},
-  R extends MixinTarget<CrudRepository<M>>
+  R extends MixinTarget<CrudRepository<M>>,
 >(superClass: R) {
   class MixedRepository extends superClass implements FindByTitle<M> {
     async findByTitle(title: string): Promise<M[]> {
@@ -524,7 +524,7 @@ method to any controller.
 {% include code-caption.html content="src/mixins/src/mixins/find-by-title-controller-mixin.ts" %}
 
 ```ts
-import {Constructor} from '@loopback/core';
+import {MixinTarget} from '@loopback/core';
 import {Model} from '@loopback/repository';
 import {FindByTitle} from './find-by-title-interface';
 import {param, get, getModelSchemaRef} from '@loopback/rest';
@@ -553,7 +553,7 @@ export interface FindByTitleControllerMixinOptions {
  */
 export function FindByTitleControllerMixin<
   M extends Model,
-  T extends MixinTarget<object>
+  T extends MixinTarget<object>,
 >(superClass: T, options: FindByTitleControllerMixinOptions) {
   class MixedController extends superClass implements FindByTitle<M> {
     // Value will be provided by the subclassed controller class
@@ -638,7 +638,7 @@ export class NoteController {
 ```
 
 For a full example of a CLI-generated controller for a model `Todo`, see
-[TodoController ](https://github.com/strongloop/loopback-next/blob/master/examples/todo/src/controllers/todo.controller.ts).
+[TodoController ](https://github.com/loopbackio/loopback-next/blob/master/examples/todo/src/controllers/todo.controller.ts).
 
 #### Adjusting NoteController To Use FindByTitleControllerMixin
 

@@ -152,22 +152,21 @@ export function inject(
     if (typeof methodDescriptorOrParameterIndex === 'number') {
       // The decorator is applied to a method parameter
       // Please note propertyKey is `undefined` for constructor
-      const paramDecorator: ParameterDecorator = ParameterDecoratorFactory.createDecorator<
-        Injection
-      >(
-        INJECT_PARAMETERS_KEY,
-        {
-          target,
-          member,
-          methodDescriptorOrParameterIndex,
-          bindingSelector,
-          metadata: injectionMetadata,
-          resolve,
-        },
-        // Do not deep clone the spec as only metadata is mutable and it's
-        // shallowly cloned
-        {cloneInputSpec: false, decoratorName: injectionMetadata.decorator},
-      );
+      const paramDecorator: ParameterDecorator =
+        ParameterDecoratorFactory.createDecorator<Injection>(
+          INJECT_PARAMETERS_KEY,
+          {
+            target,
+            member,
+            methodDescriptorOrParameterIndex,
+            bindingSelector,
+            metadata: injectionMetadata,
+            resolve,
+          },
+          // Do not deep clone the spec as only metadata is mutable and it's
+          // shallowly cloned
+          {cloneInputSpec: false, decoratorName: injectionMetadata.decorator},
+        );
       paramDecorator(target, member!, methodDescriptorOrParameterIndex);
     } else if (member) {
       // Property or method
@@ -188,22 +187,21 @@ export function inject(
             ),
         );
       }
-      const propDecorator: PropertyDecorator = PropertyDecoratorFactory.createDecorator<
-        Injection
-      >(
-        INJECT_PROPERTIES_KEY,
-        {
-          target,
-          member,
-          methodDescriptorOrParameterIndex,
-          bindingSelector,
-          metadata: injectionMetadata,
-          resolve,
-        },
-        // Do not deep clone the spec as only metadata is mutable and it's
-        // shallowly cloned
-        {cloneInputSpec: false, decoratorName: injectionMetadata.decorator},
-      );
+      const propDecorator: PropertyDecorator =
+        PropertyDecoratorFactory.createDecorator<Injection>(
+          INJECT_PROPERTIES_KEY,
+          {
+            target,
+            member,
+            methodDescriptorOrParameterIndex,
+            bindingSelector,
+            metadata: injectionMetadata,
+            resolve,
+          },
+          // Do not deep clone the spec as only metadata is mutable and it's
+          // shallowly cloned
+          {cloneInputSpec: false, decoratorName: injectionMetadata.decorator},
+        );
       propDecorator(target, member!);
     } else {
       // It won't happen here as `@inject` is not compatible with ClassDecorator
@@ -512,7 +510,7 @@ function shouldSkipBaseConstructorInjection(targetClass: Object) {
   const classDef = targetClass.toString();
   return (
     /*
-     * See https://github.com/strongloop/loopback-next/issues/2946
+     * See https://github.com/loopbackio/loopback-next/issues/2946
      * A class decorator can return a new constructor that mixes in
      * additional properties/methods.
      *
@@ -541,7 +539,7 @@ function shouldSkipBaseConstructorInjection(targetClass: Object) {
       /\s+constructor\s*\(\s*\)\s*\{\s*super\(\.\.\.arguments\)/,
     ) &&
     /*
-     * See https://github.com/strongloop/loopback-next/issues/1565
+     * See https://github.com/loopbackio/loopback-next/issues/1565
      *
      * @example
      * ```ts

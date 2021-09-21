@@ -22,6 +22,8 @@ import {
   CustomerCartItemLink,
   CustomerCartItemLinkRepository,
   CustomerRepository,
+  Order,
+  OrderRepository,
   User,
   UserLink,
   UserLinkRepository,
@@ -46,26 +48,25 @@ export function hasManyThroughInclusionResolverAcceptance(
       let customerRepo: CustomerRepository;
       let cartItemRepo: CartItemRepository;
       let customerCartItemLinkRepo: CustomerCartItemLinkRepository;
+      let orderRepo: OrderRepository;
 
       before(
         withCrudCtx(async function setupRepository(ctx: CrudTestContext) {
           // this helper should create the inclusion resolvers and also
           // register inclusion resolvers for us
-          ({
-            customerRepo,
-            cartItemRepo,
-            customerCartItemLinkRepo,
-          } = givenBoundCrudRepositories(
-            ctx.dataSource,
-            repositoryClass,
-            features,
-          ));
+          ({customerRepo, cartItemRepo, customerCartItemLinkRepo, orderRepo} =
+            givenBoundCrudRepositories(
+              ctx.dataSource,
+              repositoryClass,
+              features,
+            ));
           expect(customerRepo.cartItems.inclusionResolver).to.be.Function();
 
           await ctx.dataSource.automigrate([
             Customer.name,
             CartItem.name,
             CustomerCartItemLink.name,
+            Order.name,
           ]);
         }),
       );
@@ -74,6 +75,7 @@ export function hasManyThroughInclusionResolverAcceptance(
         await customerRepo.deleteAll();
         await cartItemRepo.deleteAll();
         await customerCartItemLinkRepo.deleteAll();
+        await orderRepo.deleteAll();
       });
 
       it('throws an error if tries to query nonexistent relation names', async () => {
@@ -83,10 +85,8 @@ export function hasManyThroughInclusionResolverAcceptance(
           .create({description: 'crown'});
 
         await expect(
-          customerRepo.find({include: [{relation: 'crown'}]}),
-        ).to.be.rejectedWith(
-          `Invalid "filter.include" entries: {"relation":"crown"}`,
-        );
+          customerRepo.find({include: ['crown']}),
+        ).to.be.rejectedWith(`Invalid "filter.include" entries: "crown"`);
       });
 
       it('returns single model instance including single related instance', async () => {
@@ -96,7 +96,7 @@ export function hasManyThroughInclusionResolverAcceptance(
           .create({description: 'crown'});
 
         const result = await customerRepo.find({
-          include: [{relation: 'cartItems'}],
+          include: ['cartItems'],
         });
 
         expect(toJSON(result)).to.deepEqual([
@@ -121,7 +121,7 @@ export function hasManyThroughInclusionResolverAcceptance(
           .create({description: 'green hat'});
 
         const result = await customerRepo.find({
-          include: [{relation: 'cartItems'}],
+          include: ['cartItems'],
         });
 
         const expected = [
@@ -148,7 +148,7 @@ export function hasManyThroughInclusionResolverAcceptance(
           .create({description: 'green hat'});
 
         const result = await customerRepo.findById(zelda.id, {
-          include: [{relation: 'cartItems'}],
+          include: ['cartItems'],
         });
         const expected = {
           ...zelda,
@@ -199,6 +199,71 @@ export function hasManyThroughInclusionResolverAcceptance(
         expect(result.length).to.eql(1);
         expect(result[0].cartItems.length).to.eql(1);
       });
+
+      it('finds models with nested inclusion', async () => {
+        const o1 = await orderRepo.create({description: 'order 1'});
+        const o2 = await orderRepo.create({description: 'order 2'});
+        const o3 = await orderRepo.create({description: 'order 3'});
+
+        const link = await customerRepo.create({name: 'Link'});
+        const sword = await customerRepo
+          .cartItems(link.id)
+          .create({description: 'master sword', orderId: o2.id});
+        const shield = await customerRepo
+          .cartItems(link.id)
+          .create({description: 'shield', orderId: o1.id});
+
+        const zelda = await customerRepo.create({name: 'Zelda'});
+        const force = await customerRepo
+          .cartItems(zelda.id)
+          .create({description: 'Triforce', orderId: o3.id});
+
+        const result = await customerRepo.find({
+          include: [{relation: 'cartItems', scope: {include: ['order']}}],
+        });
+
+        const empty = {
+          isShipped: features.emptyValue,
+          shipmentInfo: features.emptyValue,
+        };
+
+        const expected = [
+          {
+            ...link,
+            parentId: features.emptyValue,
+            cartItems: [
+              {
+                ...sword,
+                order: {
+                  ...o2,
+                  ...empty,
+                },
+              },
+              {
+                ...shield,
+                order: {
+                  ...o1,
+                  ...empty,
+                },
+              },
+            ],
+          },
+          {
+            ...zelda,
+            parentId: features.emptyValue,
+            cartItems: [
+              {
+                ...force,
+                order: {
+                  ...o3,
+                  ...empty,
+                },
+              },
+            ],
+          },
+        ];
+        expect(toJSON(result)).to.deepEqual(toJSON(expected));
+      });
     });
 
     describe('HasManyThrough inclusion resolver - self through', () => {
@@ -228,7 +293,7 @@ export function hasManyThroughInclusionResolverAcceptance(
         const zelda = await userRepo.users(link.id).create({name: 'zelda'});
 
         const result = await userRepo.findById(link.id, {
-          include: [{relation: 'users'}],
+          include: ['users'],
         });
 
         expect(toJSON(result)).to.deepEqual(
@@ -246,7 +311,7 @@ export function hasManyThroughInclusionResolverAcceptance(
         const hilda = await userRepo.users(link.id).create({name: 'hilda'});
 
         const result = await userRepo.find({
-          include: [{relation: 'users'}],
+          include: ['users'],
         });
 
         const expected = [

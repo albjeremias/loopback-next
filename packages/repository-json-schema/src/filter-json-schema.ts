@@ -47,6 +47,7 @@ export function getScopeFilterJsonSchemaFor(
   class EmptyModel extends Model {}
 
   const schema: JsonSchema = {
+    type: 'object',
     ...getFilterJsonSchemaFor(EmptyModel, {
       setTitle: false,
     }),
@@ -126,6 +127,7 @@ export function getFilterJsonSchemaFor(
   }
 
   const schema: JsonSchema = {
+    type: 'object',
     ...(options.setTitle !== false && {
       title: `${modelCtor.modelName}.Filter`,
     }),
@@ -143,16 +145,23 @@ export function getFilterJsonSchemaFor(
       }),
       type: 'array',
       items: {
-        ...(options.setTitle !== false && {
-          title: `${modelCtor.modelName}.IncludeFilter.Items`,
-        }),
-        type: 'object',
-        properties: {
-          // TODO(bajtos) restrict values to relations defined by "model"
-          relation: {type: 'string'},
-          // TODO(bajtos) describe the filter for the relation target model
-          scope: getScopeFilterJsonSchemaFor(modelCtor, options),
-        },
+        anyOf: [
+          {
+            ...(options.setTitle !== false && {
+              title: `${modelCtor.modelName}.IncludeFilter.Items`,
+            }),
+            type: 'object',
+            properties: {
+              // TODO(bajtos) restrict values to relations defined by "model"
+              relation: {type: 'string'},
+              // TODO(bajtos) describe the filter for the relation target model
+              scope: getScopeFilterJsonSchemaFor(modelCtor, options),
+            },
+          },
+          {
+            type: 'string',
+          },
+        ],
       },
     };
   }
@@ -179,7 +188,7 @@ export function getWhereJsonSchemaFor(
     }),
     type: 'object',
     // TODO(bajtos) enumerate "model" properties and operators like "and"
-    // See https://github.com/strongloop/loopback-next/issues/1748
+    // See https://github.com/loopbackio/loopback-next/issues/1748
     additionalProperties: true,
   };
 
@@ -197,20 +206,32 @@ export function getFieldsJsonSchemaFor(
   modelCtor: typeof Model,
   options: FilterSchemaOptions = {},
 ): JsonSchema {
-  const schema: JsonSchema = {
-    ...(options.setTitle !== false && {
-      title: `${modelCtor.modelName}.Fields`,
-    }),
-    type: 'object',
+  const schema: JsonSchema = {oneOf: []};
+  if (options.setTitle !== false) {
+    schema.title = `${modelCtor.modelName}.Fields`;
+  }
 
-    properties: Object.assign(
+  const properties = Object.keys(modelCtor.definition.properties);
+  const additionalProperties = modelCtor.definition.settings.strict === false;
+
+  schema.oneOf?.push({
+    type: 'object',
+    properties: properties.reduce(
+      (prev, crr) => ({...prev, [crr]: {type: 'boolean'}}),
       {},
-      ...Object.keys(modelCtor.definition.properties).map(k => ({
-        [k]: {type: 'boolean'},
-      })),
     ),
-    additionalProperties: modelCtor.definition.settings.strict === false,
-  };
+    additionalProperties,
+  });
+
+  schema.oneOf?.push({
+    type: 'array',
+    items: {
+      type: 'string',
+      enum: properties.length && !additionalProperties ? properties : undefined,
+      examples: properties,
+    },
+    uniqueItems: true,
+  });
 
   return schema;
 }

@@ -11,6 +11,7 @@ import {
 } from '@loopback/repository-json-schema';
 import {includes} from 'lodash';
 import {buildResponsesFromMetadata} from './build-responses-from-metadata';
+import {REQUEST_BODY_INDEX} from './decorators';
 import {resolveSchema} from './generate-schema';
 import {jsonToSchemaObject, SchemaRef} from './json-to-schema';
 import {OAI3Keys} from './keys';
@@ -19,6 +20,7 @@ import {
   ISpecificationExtension,
   isReferenceObject,
   OperationObject,
+  OperationVisibility,
   ParameterObject,
   PathObject,
   ReferenceObject,
@@ -93,17 +95,33 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
     constructor,
   );
 
+  const classVisibility =
+    MetadataInspector.getClassMetadata<OperationVisibility>(
+      OAI3Keys.VISIBILITY_CLASS_KEY,
+      constructor,
+    );
+
+  if (classVisibility) {
+    debug(`  using class-level @oas.visibility(): '${classVisibility}'`);
+  }
+
   if (classTags) {
     debug('  using class-level @oas.tags()');
   }
 
-  if (classTags || isClassDeprecated) {
+  if (classTags || isClassDeprecated || classVisibility) {
     for (const path of Object.keys(spec.paths)) {
       for (const method of Object.keys(spec.paths[path])) {
         /* istanbul ignore else */
         if (isClassDeprecated) {
           spec.paths[path][method].deprecated = true;
         }
+
+        /* istanbul ignore else */
+        if (classVisibility) {
+          spec.paths[path][method]['x-visibility'] = classVisibility;
+        }
+
         /* istanbul ignore else */
         if (classTags) {
           if (spec.paths[path][method].tags?.length) {
@@ -141,9 +159,25 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
       debug('  using method-level deprecation via @deprecated()');
     }
 
-    const methodTags = MetadataInspector.getMethodMetadata<
-      TagsDecoratorMetadata
-    >(OAI3Keys.TAGS_METHOD_KEY, constructor.prototype, op);
+    const methodVisibility =
+      MetadataInspector.getMethodMetadata<OperationVisibility>(
+        OAI3Keys.VISIBILITY_METHOD_KEY,
+        constructor.prototype,
+        op,
+      );
+
+    if (methodVisibility) {
+      debug(
+        `  using method-level visibility via @visibility(): '${methodVisibility}'`,
+      );
+    }
+
+    const methodTags =
+      MetadataInspector.getMethodMetadata<TagsDecoratorMetadata>(
+        OAI3Keys.TAGS_METHOD_KEY,
+        constructor.prototype,
+        op,
+      );
 
     if (methodTags) {
       debug('  using method-level tags via @oas.tags()');
@@ -165,9 +199,12 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
 
     let operationSpec = endpoint.spec;
 
-    const decoratedResponses = MetadataInspector.getMethodMetadata<
-      ResponseDecoratorMetadata
-    >(OAI3Keys.RESPONSE_METHOD_KEY, constructor.prototype, op);
+    const decoratedResponses =
+      MetadataInspector.getMethodMetadata<ResponseDecoratorMetadata>(
+        OAI3Keys.RESPONSE_METHOD_KEY,
+        constructor.prototype,
+        op,
+      );
 
     if (!operationSpec) {
       if (decoratedResponses) {
@@ -202,7 +239,7 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
 
     debug('  spec responses for method %s: %o', op, operationSpec.responses);
 
-    // Prescedence: method decorator > class decorator > operationSpec > undefined
+    // Precedence: method decorator > class decorator > operationSpec > undefined
     const deprecationSpec =
       isMethodDeprecated ??
       isClassDeprecated ??
@@ -211,6 +248,14 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
 
     if (deprecationSpec) {
       operationSpec.deprecated = true;
+    }
+
+    // Precedence: method decorator > class decorator > operationSpec > 'documented'
+    const visibilitySpec: OperationVisibility =
+      methodVisibility ?? classVisibility ?? operationSpec['x-visibility'];
+
+    if (visibilitySpec) {
+      operationSpec['x-visibility'] = visibilitySpec;
     }
 
     for (const code in operationSpec.responses) {
@@ -232,6 +277,7 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
     );
 
     debug('  parameters for method %s: %j', op, params);
+    const paramIndexes: number[] = [];
     if (params != null) {
       params = DecoratorFactory.cloneDeep<ParameterObject[]>(params);
       /**
@@ -247,7 +293,11 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
        * ```
        */
       operationSpec.parameters = params
-        .filter(p => p != null)
+        .filter((p, i) => {
+          if (p == null) return false;
+          paramIndexes.push(i);
+          return true;
+        })
         .map(p => {
           // Per OpenAPI spec, `required` must be `true` for path parameters
           if (p.in === 'path') {
@@ -258,12 +308,20 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
     }
 
     debug('  processing requestBody for method %s', op);
-    let requestBodies = MetadataInspector.getAllParameterMetadata<
-      RequestBodyObject
-    >(OAI3Keys.REQUEST_BODY_KEY, constructor.prototype, op);
+    let requestBodies =
+      MetadataInspector.getAllParameterMetadata<RequestBodyObject>(
+        OAI3Keys.REQUEST_BODY_KEY,
+        constructor.prototype,
+        op,
+      );
 
+    const bodyIndexes: number[] = [];
     if (requestBodies != null)
-      requestBodies = requestBodies.filter(p => p != null);
+      requestBodies = requestBodies.filter((p, i) => {
+        if (p == null) return false;
+        bodyIndexes.push(i);
+        return true;
+      });
     let requestBody: RequestBodyObject;
 
     if (requestBodies) {
@@ -276,6 +334,15 @@ function resolveControllerSpec(constructor: Function): ControllerSpec {
       debug('  requestBody for method %s: %j', op, requestBody);
       /* istanbul ignore else */
       if (requestBody) {
+        // Find the relative index of the request body
+        const bodyIndex = bodyIndexes[0];
+        let index = 0;
+        for (; index < paramIndexes.length; index++) {
+          if (bodyIndex < paramIndexes[index]) break;
+        }
+        if (index !== 0) {
+          requestBody[REQUEST_BODY_INDEX] = index;
+        }
         operationSpec.requestBody = requestBody;
 
         /* istanbul ignore else */

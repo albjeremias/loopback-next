@@ -53,7 +53,7 @@ a REST query. The above example can be written as:
 ### Filter limit
 
 {% include important.html content="There is a limit of twenty filters (combined with AND or OR) using this format, due to the use of [qs](https://github.com/ljharb/qs#parsing-arrays).  When there are more than twenty, the filter is converted into an `Object` where it is expecting
-an `Array`. See [LoopBack issue #2824](https://github.com/strongloop/loopback/issues/2824) for more details.
+an `Array`. See [LoopBack issue #2824](https://github.com/loopbackio/loopback/issues/2824) for more details.
 " %}
 
 You can encode the large filter object as "stringified JSON":
@@ -633,7 +633,7 @@ Or stringified JSON format:
 ## WhereBuilder
 
 You can use the
-[`WhereBuilder`](https://loopback.io/doc/en/lb4/apidocs.repository.wherebuilder.html)
+[`WhereBuilder`](https://loopback.io/doc/en/lb4/apidocs.filter.wherebuilder.html)
 to build and/or combine `where` clauses. You can build `where` clause with
 operators such as `and/or`, `gt`, etc.
 
@@ -665,7 +665,7 @@ the filter will be built as
 ```
 
 Another common usage is to combine `where` clauses with
-[`WhereBuilder.impose`](https://loopback.io/doc/en/lb4/apidocs.repository.wherebuilder.impose.html).
+[`WhereBuilder.impose`](https://loopback.io/doc/en/lb4/apidocs.filter.wherebuilder.impose.html).
 It adds a `where` object to the existing `where` filter by using the `and`
 operator. For example,
 

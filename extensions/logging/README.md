@@ -43,13 +43,13 @@ facilities:
 
 ```ts
 import {inject} from '@loopback/core';
-import {Logger, logInvocation} from '@loopback/logging';
+import {WinstonLogger, logInvocation} from '@loopback/logging';
 import {get, param} from '@loopback/rest';
 
 class MyController {
   // Inject a winston logger
   @inject(LoggingBindings.WINSTON_LOGGER)
-  private logger: Logger;
+  private logger: WinstonLogger;
 
   // http access is logged by a global interceptor
   @get('/greet/{name}')
@@ -78,6 +78,9 @@ app.configure(LoggingBindings.COMPONENT).to({
   enableHttpAccessLog: true, // default to true
 });
 ```
+
+{% include note.html content="this.configure() must be called before
+this.component() to take effect." %}
 
 - `enableFluent`: Enable logs to be sent to Fluentd
 - `enableHttpAccessLog`: Enable all http requests to be logged via a global
@@ -176,8 +179,8 @@ ctx
 
 ## Contributions
 
-- [Guidelines](https://github.com/strongloop/loopback-next/blob/master/docs/CONTRIBUTING.md)
-- [Join the team](https://github.com/strongloop/loopback-next/issues/110)
+- [Guidelines](https://github.com/loopbackio/loopback-next/blob/master/docs/CONTRIBUTING.md)
+- [Join the team](https://github.com/loopbackio/loopback-next/issues/110)
 
 ## Tests
 
@@ -189,7 +192,7 @@ The acceptance test against fluentd is available as a separate package at
 ## Contributors
 
 See
-[all contributors](https://github.com/strongloop/loopback-next/graphs/contributors).
+[all contributors](https://github.com/loopbackio/loopback-next/graphs/contributors).
 
 ## License
 

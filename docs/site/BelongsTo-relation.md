@@ -14,7 +14,7 @@ permalink: /doc/en/lb4/BelongsTo-relation.html
 This relation best works with databases that support foreign key
 constraints (SQL).
 Using this relation with NoSQL databases will result in unexpected behavior,
-such as the ability to create a relation with a model that does not exist. We are [working on a solution](https://github.com/strongloop/loopback-next/issues/2341) to better handle this. It is fine to use this relation with NoSQL databases for purposes such as navigating
+such as the ability to create a relation with a model that does not exist. We are [working on a solution](https://github.com/loopbackio/loopback-next/issues/2341) to better handle this. It is fine to use this relation with NoSQL databases for purposes such as navigating
 related models, where the referential integrity is not critical.
 " %}
 
@@ -208,7 +208,7 @@ export interface OrderRelations {
 }
 ```
 
-{% include important.html content="LB4 doesn't support composite keys for now. e.g joining two tables with more than one source key. Related GitHub issue: [Composite primary/foreign keys](https://github.com/strongloop/loopback-next/issues/1830)" %}
+{% include important.html content="LB4 doesn't support composite keys for now. e.g joining two tables with more than one source key. Related GitHub issue: [Composite primary/foreign keys](https://github.com/loopbackio/loopback-next/issues/1830)" %}
 
 ## Configuring a belongsTo relation
 
@@ -388,7 +388,7 @@ export class CategoryRepository extends DefaultCrudRepository<
 DO NOT declare
 `@repository.getter(CategoryRepository) protected categoryRepositoryGetter: Getter<CategoryRepository>`
 on constructor to avoid "Circular dependency" error (see
-[issue #2118](https://github.com/strongloop/loopback-next/issues/2118))
+[issue #2118](https://github.com/loopbackio/loopback-next/issues/2118))
 
 ## Querying related models
 
@@ -411,13 +411,13 @@ allows users to retrieve all orders along with their related customers through
 the following code at the repository level:
 
 ```ts
-orderRepo.find({include: [{relation: 'customer'}]});
+orderRepo.find({include: ['customer']});
 ```
 
 or use APIs with controllers:
 
 ```
-GET http://localhost:3000/orders?filter[include][][relation]=customer
+GET http://localhost:3000/orders?filter[include][]=customer
 ```
 
 ### Enable/disable the inclusion resolvers
@@ -464,13 +464,13 @@ export class OrderRepository extends DefaultCrudRepository {
   if you process data at the repository level:
 
   ```ts
-  orderRepository.find({include: [{relation: 'customer'}]});
+  orderRepository.find({include: ['customer']});
   ```
 
   this is the same as the url:
 
   ```
-  GET http://localhost:3000/orders?filter[include][][relation]=customer
+  GET http://localhost:3000/orders?filter[include][]=customer
   ```
 
   which returns:
@@ -505,8 +505,6 @@ export class OrderRepository extends DefaultCrudRepository {
     },
   ];
   ```
-
-{% include note.html content="The query syntax is a slightly different from LB3. We are also thinking about simplifying the query syntax. Check our GitHub issue for more information: [Simpler Syntax for Inclusion](https://github.com/strongloop/loopback-next/issues/3205)" %}
 
 Here is a diagram to make this more intuitive:
 

@@ -7,8 +7,7 @@ import {Getter} from '@loopback/core';
 import {DataObject, Options} from '../../common-types';
 import {EntityNotFoundError} from '../../errors';
 import {Entity} from '../../model';
-import {constrainFilter} from '../../repositories/constraint-utils';
-import {EntityCrudRepository} from '../../repositories/repository';
+import {constrainFilter, EntityCrudRepository} from '../../repositories';
 
 /**
  * CRUD operations for a target repository of a BelongsTo relation
@@ -26,8 +25,9 @@ export interface BelongsToRepository<Target extends Entity> {
 export class DefaultBelongsToRepository<
   TargetEntity extends Entity,
   TargetId,
-  TargetRepository extends EntityCrudRepository<TargetEntity, TargetId>
-> implements BelongsToRepository<TargetEntity> {
+  TargetRepository extends EntityCrudRepository<TargetEntity, TargetId>,
+> implements BelongsToRepository<TargetEntity>
+{
   /**
    * Constructor of DefaultBelongsToEntityCrudRepository
    * @param getTargetRepository - the getter of the related target model repository instance

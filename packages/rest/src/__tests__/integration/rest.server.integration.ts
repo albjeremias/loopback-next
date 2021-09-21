@@ -119,7 +119,7 @@ describe('RestServer (integration)', () => {
       response.end();
     }
 
-    // See https://github.com/strongloop/loopback-next/issues/2088
+    // See https://github.com/loopbackio/loopback-next/issues/2088
     const server = await givenAServer();
     server.handler(requestWithQueryHandler);
     await server.start();
@@ -178,17 +178,17 @@ describe('RestServer (integration)', () => {
       console.error = consoleError;
     });
 
-    it('responds with 500 when Sequence fails with unhandled error', async () => {
+    it('responds with 500 when Sequence returns a rejected promise', async () => {
       server.handler((context, sequence) => {
         return Promise.reject(new Error('unhandled test error'));
       });
       await createClientForHandler(server.requestHandler).get('/').expect(500);
       expect(errorMsg).to.match(
-        /Unhandled error in GET \/\: 500 Error\: unhandled test error/,
+        /Request GET \/\ failed with status code 500. Error\: unhandled test error/,
       );
     });
 
-    it('hangs up socket when Sequence fails with unhandled error and headers sent', async () => {
+    it('hangs up socket when Sequence returns a rejected promise but headers were already sent', async () => {
       server.handler((context, sequence) => {
         context.response.writeHead(200);
         return Promise.reject(new Error('unhandled test error after sent'));
@@ -198,7 +198,7 @@ describe('RestServer (integration)', () => {
         createClientForHandler(server.requestHandler).get('/'),
       ).to.be.rejectedWith(/socket hang up/);
       expect(errorMsg).to.match(
-        /Unhandled error in GET \/\: 500 Error\: unhandled test error after sent/,
+        /Request GET \/\ failed with status code 500. Error\: unhandled test error/,
       );
     });
   });
@@ -526,7 +526,7 @@ describe('RestServer (integration)', () => {
     const response = await createClientForHandler(server.requestHandler).get(
       '/openapi.yaml',
     );
-    const expected = yaml.safeLoad(`
+    const expected = yaml.load(`
 openapi: 3.0.0
 info:
   title: LoopBack Application
@@ -543,7 +543,7 @@ paths:
                 type: string
     `);
     // Use json for comparison to tolerate textual diffs
-    const json = yaml.safeLoad(response.text) as OpenAPIObject;
+    const json = yaml.load(response.text) as OpenAPIObject;
     expect(json).to.containDeep(expected);
     expect(json.servers?.[0].url).to.match('/');
 
@@ -581,7 +581,7 @@ paths:
   // this doesn't work: once the generic routes have been added to express to
   // direct requests at controllers, adding OpenAPI spec routes after that
   // no longer works in the sense that express won't ever try those routes
-  // https://github.com/strongloop/loopback-next/issues/433 will make changes
+  // https://github.com/loopbackio/loopback-next/issues/433 will make changes
   // that make it possible to enable this test
   it.skip('can add openApiSpec endpoints after express initialization', async () => {
     const server = await givenAServer();
@@ -628,7 +628,7 @@ paths:
     await server.get(RestBindings.PORT);
     const expectedUrl = new RegExp(
       [
-        'http://explorer.loopback.io',
+        'http://explorer\\.loopback\\.io',
         '\\?url=http://\\d+.\\d+.\\d+.\\d+:\\d+/openapi.json',
       ].join(''),
     );
@@ -663,8 +663,8 @@ paths:
     await server.get(RestBindings.PORT);
     const expectedUrl = new RegExp(
       [
-        'https://explorer.loopback.io',
-        '\\?url=https://example.com:8080/openapi.json',
+        'https://explorer\\.loopback\\.io',
+        '\\?url=https://example\\.com:8080/openapi\\.json',
       ].join(''),
     );
     expect(response.get('Location')).match(expectedUrl);
@@ -702,8 +702,8 @@ paths:
     await server.get(RestBindings.PORT);
     const expectedUrl = new RegExp(
       [
-        'https://explorer.loopback.io',
-        '\\?url=https://example.com/openapi.json',
+        'https://explorer\\.loopback\\.io',
+        '\\?url=https://example\\.com/openapi\\.json',
       ].join(''),
     );
     expect(response.get('Location')).match(expectedUrl);
@@ -720,7 +720,7 @@ paths:
       .get('/explorer')
       .set('host', '');
     await app.stop();
-    const expectedUrl = new RegExp(`\\?url=http://127.0.0.1:${port}`);
+    const expectedUrl = new RegExp(`\\?url=http://127\\.0\\.0\\.1:${port}`);
     expect(response.get('Location')).match(expectedUrl);
   });
 
@@ -739,7 +739,7 @@ paths:
     await server.get(RestBindings.PORT);
     const expectedUrl = new RegExp(
       [
-        'https://petstore.swagger.io',
+        'https://petstore\\.swagger\\.io',
         '\\?url=http://\\d+.\\d+.\\d+.\\d+:\\d+/openapi.json',
       ].join(''),
     );
@@ -763,7 +763,7 @@ paths:
     await server.get(RestBindings.PORT);
     const expectedUrl = new RegExp(
       [
-        'http://petstore.swagger.io',
+        'http://petstore\\.swagger\\.io',
         '\\?url=http://\\d+.\\d+.\\d+.\\d+:\\d+/openapi.json',
       ].join(''),
     );
@@ -825,7 +825,7 @@ paths:
     await server.stop();
   });
 
-  // https://github.com/strongloop/loopback-next/issues/1623
+  // https://github.com/loopbackio/loopback-next/issues/1623
   skipOnTravis(it, 'handles IPv6 address for API Explorer UI', async () => {
     const keyPath = path.join(FIXTURES, 'key.pem');
     const certPath = path.join(FIXTURES, 'cert.pem');
@@ -1093,11 +1093,14 @@ paths:
         },
       },
     };
-    server.route('post', '/returnData', returnDataSpec, function returnData(
-      data: Data,
-    ) {
-      return data.greet;
-    });
+    server.route(
+      'post',
+      '/returnData',
+      returnDataSpec,
+      function returnData(data: Data) {
+        return data.greet;
+      },
+    );
 
     await server.start();
     const client = createClientForHandler(server.requestHandler);

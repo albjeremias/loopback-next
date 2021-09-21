@@ -1,17 +1,25 @@
 {
   "name": "@loopback/example-validation-app",
-  "version": "1.7.4",
   "description": "An example demonstrating how to add validation in a LoopBack 4 application",
+  "version": "2.0.1",
+  "keywords": [
+    "loopback",
+    "LoopBack",
+    "example",
+    "validation"
+  ],
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "engines": {
-    "node": ">=10.16"
-  },
   "author": "IBM Corp.",
   "copyright.owner": "IBM Corp.",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "examples/validation-app"
+  },
+  "engines": {
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "build": "lb-tsc",
@@ -24,7 +32,7 @@
     "prettier:fix": "npm run prettier:cli -- --write",
     "eslint": "lb-eslint --report-unused-disable-directives .",
     "eslint:fix": "npm run eslint -- --fix",
-    "pretest": "npm run clean && npm run build",
+    "pretest": "npm run rebuild",
     "test": "lb-mocha --allow-console-logs \"dist/__tests__\"",
     "posttest": "npm run lint",
     "test:dev": "lb-mocha --allow-console-logs dist/__tests__/**/*.js && npm run posttest",
@@ -34,37 +42,30 @@
     "migrate": "node ./dist/migrate",
     "preopenapi-spec": "npm run build",
     "openapi-spec": "node ./dist/openapi-spec",
-    "prestart": "npm run build",
+    "rebuild": "npm run clean && npm run build",
+    "prestart": "npm run rebuild",
     "start": "node -r source-map-support/register ."
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "examples/validation-app"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
-    "@loopback/boot": "^3.0.1",
-    "@loopback/core": "^2.10.1",
-    "@loopback/repository": "^3.0.1",
-    "@loopback/rest": "^7.0.1",
-    "@loopback/rest-explorer": "^3.0.1",
-    "@loopback/service-proxy": "^3.0.1",
-    "strong-error-handler": "^3.5.0",
-    "tslib": "^2.0.1"
+    "@loopback/boot": "^3.4.3",
+    "@loopback/core": "^2.17.0",
+    "@loopback/repository": "^3.7.2",
+    "@loopback/rest": "^10.0.1",
+    "@loopback/rest-explorer": "^3.3.3",
+    "@loopback/service-proxy": "^3.2.3",
+    "strong-error-handler": "^4.0.0",
+    "tslib": "^2.3.1"
   },
   "devDependencies": {
-    "@loopback/build": "^6.2.4",
-    "@loopback/eslint-config": "^10.0.0",
-    "@loopback/testlab": "^3.2.6",
-    "@types/node": "^10.17.35",
-    "eslint": "^7.9.0",
-    "source-map-support": "^0.5.19",
-    "typescript": "~4.0.3"
-  },
-  "keywords": [
-    "loopback",
-    "LoopBack",
-    "example",
-    "validation"
-  ]
+    "@loopback/build": "^7.0.1",
+    "@loopback/eslint-config": "^11.0.1",
+    "@loopback/testlab": "^3.4.3",
+    "@types/node": "^10.17.60",
+    "eslint": "^7.32.0",
+    "source-map-support": "^0.5.20",
+    "typescript": "~4.3.5"
+  }
 }

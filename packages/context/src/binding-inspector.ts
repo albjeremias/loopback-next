@@ -170,10 +170,15 @@ export function removeNameAndKeyTags(binding: Binding<unknown>) {
  */
 export function bindingTemplateFor<T>(
   cls: Constructor<T | Provider<T>> | DynamicValueProviderClass<T>,
+  options?: BindingFromClassOptions,
 ): BindingTemplate<T> {
   const spec = getBindingMetadata(cls);
   debug('class %s has binding metadata', cls.name, spec);
-  const templateFunctions = spec?.templates ?? [asClassOrProvider(cls)];
+  const templateFunctions = spec?.templates ?? [];
+  if (spec?.target !== cls) {
+    // Make sure the subclass is used as the binding source
+    templateFunctions.push(asClassOrProvider(cls) as BindingTemplate<unknown>);
+  }
   return function applyBindingTemplatesFromMetadata(binding) {
     for (const t of templateFunctions) {
       binding.apply(t);
@@ -181,6 +186,9 @@ export function bindingTemplateFor<T>(
     if (spec?.target !== cls) {
       // Remove name/key tags inherited from base classes
       binding.apply(removeNameAndKeyTags);
+    }
+    if (options != null) {
+      applyClassBindingOptions(binding, options);
     }
   };
 }
@@ -260,10 +268,9 @@ export function createBindingFromClass<T>(
 ): Binding<T> {
   debug('create binding from class %s with options', cls.name, options);
   try {
-    const templateFn = bindingTemplateFor(cls);
+    const templateFn = bindingTemplateFor(cls, options);
     const key = buildBindingKey(cls, options);
     const binding = Binding.bind<T>(key).apply(templateFn);
-    applyClassBindingOptions(binding, options);
     return binding;
   } catch (err) {
     err.message += ` (while building binding for class ${cls.name})`;

@@ -59,6 +59,22 @@ list.
       <td><a href="https://www.npmjs.com/package/loopback-component-filter">loopback-component-filter</a></td>
       <td>Filter models in repository layer, using an async function</td>
     </tr>
+    <tr>
+      <td><a href="https://www.npmjs.com/package/@sourceloop/vault">@sourceloop/vault</a></td>
+      <td>HashiCorp's Vault integration in loopback applications</td>
+    </tr>
+    <tr>
+      <td><a href="https://www.npmjs.com/package/@sourceloop/audit-log">@sourceloop/audit-log</a></td>
+      <td>Implement audit logs in loopback applications for all DB transactions</td>
+    </tr>
+    <tr>
+      <td><a href="https://www.npmjs.com/package/loopback-rabbitmq">loopback-rabbitmq</a></td>
+      <td>An Rabbitmq extension that implements Queue consumers and producers</td>
+    </tr>
+    <tr>
+      <td><a href="https://www.npmjs.com/package/loopback4-dynamic-datasource">loopback4-dynamic-datasource</a></td>
+      <td>Connect data sources dynamically during runtime</td>
+    </tr>
   </tbody>
 </table>
 

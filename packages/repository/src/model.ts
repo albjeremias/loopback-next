@@ -40,6 +40,11 @@ export type PropertyType =
 export interface PropertyDefinition {
   type: PropertyType; // For example, 'string', String, or {}
   id?: boolean | number;
+  /**
+   * Used to hide this property from the response body,
+   * adding this property to the hiddenProperties array
+   */
+  hidden?: boolean;
   json?: PropertyForm;
   jsonSchema?: JsonSchemaWithExtensions;
   store?: PropertyForm;
@@ -78,7 +83,7 @@ export interface ModelSettings {
 }
 
 /**
- * See https://github.com/strongloop/loopback-datasource-juggler/issues/432
+ * See https://github.com/loopbackio/loopback-datasource-juggler/issues/432
  */
 export interface PropertyForm {
   in?: boolean; // Can the property be used for input
@@ -304,7 +309,7 @@ function asObject(value: any, options?: Options): any {
 /**
  * Base class for models
  */
-export abstract class Model {
+export class Model {
   static get modelName(): string {
     return this.definition?.name || this.name;
   }
@@ -413,7 +418,7 @@ export abstract class ValueObject extends Model implements Persistable {}
 /**
  * Base class for entities which have unique ids
  */
-export abstract class Entity extends Model implements Persistable {
+export class Entity extends Model implements Persistable {
   /**
    * Get the names of identity properties (primary keys).
    */
@@ -432,7 +437,7 @@ export abstract class Entity extends Model implements Persistable {
       return entityOrData.getId();
     }
 
-    const idName = this.definition.idName();
+    const idName = this.getIdProperties()[0];
     return entityOrData[idName];
   }
 

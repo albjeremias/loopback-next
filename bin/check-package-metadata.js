@@ -13,8 +13,11 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-
-const Project = require('@lerna/project');
+const {
+  isTypeScriptPackage,
+  loadLernaRepo,
+  runMain,
+} = require('../packages/monorepo');
 
 /**
  * Check existence of LICENSE file in the monorepo packages
@@ -101,20 +104,17 @@ async function checkPkgsPackageJson(packages, rootPkg) {
   }
 
   for (const p of pkgs) {
-    const pkg = fs.readJsonSync(path.join(p.location, 'package.json'));
+    const pkg = p.toJSON();
 
-    const isTypescriptPackage = fs.existsSync(
-      path.join(p.location, 'tsconfig.json'),
-    );
     const isCorrectMain = pkg.main && pkg.main === 'dist/index.js';
 
-    if (isTypescriptPackage && !isCorrectMain) {
+    if (isTypeScriptPackage(p) && !isCorrectMain) {
       errors.push(getErrorText(p.name, 'main'));
     }
 
     const isCorrectTypes = pkg.types && pkg.types === 'dist/index.d.ts';
 
-    if (isTypescriptPackage && !isCorrectTypes) {
+    if (isTypeScriptPackage(p) && !isCorrectTypes) {
       errors.push(getErrorText(p.name, 'types'));
     }
 
@@ -124,7 +124,7 @@ async function checkPkgsPackageJson(packages, rootPkg) {
       pkg.publishConfig.access === 'public';
 
     if (!isPublicAccess) {
-      errors.push(getErrorText(p.name, 'publicConfig.access'));
+      errors.push(getErrorText(p.name, 'publishConfig.access'));
     }
 
     if (pkg.author !== rootPkg.author) {
@@ -143,7 +143,7 @@ async function checkPkgsPackageJson(packages, rootPkg) {
       pkg.repository &&
       pkg.repository.url &&
       pkg.repository.url.includes(
-        'https://github.com/strongloop/loopback-next.git',
+        'https://github.com/loopbackio/loopback-next.git',
       );
 
     if (!isCorrectRepositoryUrl) {
@@ -161,6 +161,8 @@ async function checkPkgsPackageJson(packages, rootPkg) {
     if (!isRepositoryDirectoryExist) {
       errors.push(`${p.name} directory doesn't exist in the monorepo`);
     }
+
+    checkDepsOrder(p, pkg, errors);
   }
 
   return errors;
@@ -184,8 +186,7 @@ function formatErrorsText(errors) {
 }
 
 async function checkPackagesMetadata() {
-  const project = new Project(process.cwd());
-  const packages = await project.getPackages();
+  const {project, packages} = await loadLernaRepo();
   const rootPath = project.rootPath;
   const rootPkg = fs.readJsonSync('package.json');
 
@@ -203,9 +204,30 @@ async function checkPackagesMetadata() {
   }
 }
 
-if (require.main === module) {
-  checkPackagesMetadata().catch(err => {
-    console.error(err.message);
-    process.exit(1);
-  });
+function checkDepsOrder(lernaPkg, pkgJson, errors) {
+  const actualOrder = Object.keys(pkgJson).filter(k =>
+    ['dependencies', 'devDependencies', 'peerDependencies'].includes(k),
+  );
+
+  const expectedOrder = [
+    'peerDependencies',
+    'dependencies',
+    'devDependencies',
+  ].filter(k => actualOrder.includes(k));
+
+  const actualStr = actualOrder.join(' ');
+  const expectedStr = expectedOrder.join(' ');
+
+  if (actualStr !== expectedStr) {
+    const pkgPath = path.relative(lernaPkg.rootPath, lernaPkg.location);
+    errors.push(
+      `${pkgPath}/package.json has incorrect order of keys.\n` +
+        `  Actual:   ${actualStr}\n` +
+        `  Expected: ${expectedStr}`,
+    );
+  }
 }
+
+module.exports = checkPackagesMetadata;
+
+runMain(module, checkPackagesMetadata);

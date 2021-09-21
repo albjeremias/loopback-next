@@ -23,8 +23,9 @@ import {
 } from '../../filter-json-schema';
 
 describe('getFilterJsonSchemaFor', () => {
-  let ajv: Ajv.Ajv;
+  let ajv: Ajv;
   let customerFilterSchema: JsonSchema;
+  let dynamicCustomerFilterSchema: JsonSchema;
   let customerFilterExcludingWhereSchema: JsonSchema;
   let customerFilterExcludingIncludeSchema: JsonSchema;
   let orderFilterSchema: JsonSchema;
@@ -32,6 +33,7 @@ describe('getFilterJsonSchemaFor', () => {
   beforeEach(() => {
     ajv = new Ajv();
     customerFilterSchema = getFilterJsonSchemaFor(Customer);
+    dynamicCustomerFilterSchema = getFilterJsonSchemaFor(DynamicCustomer);
     customerFilterExcludingWhereSchema = getFilterJsonSchemaFor(Customer, {
       exclude: ['where'],
     });
@@ -81,10 +83,10 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'additionalProperties',
-        dataPath: '',
+        instancePath: '',
         schemaPath: '#/additionalProperties',
         params: {additionalProperty: 'where'},
-        message: 'should NOT have additional properties',
+        message: 'must NOT have additional properties',
       },
     ]);
   });
@@ -95,10 +97,10 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'additionalProperties',
-        dataPath: '',
+        instancePath: '',
         schemaPath: '#/additionalProperties',
         params: {additionalProperty: 'include'},
-        message: 'should NOT have additional properties',
+        message: 'must NOT have additional properties',
       },
     ]);
   });
@@ -109,8 +111,8 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.where',
-        message: 'should be object',
+        instancePath: '/where',
+        message: 'must be object',
       },
     ]);
   });
@@ -121,8 +123,53 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.fields',
-        message: 'should be object',
+        instancePath: '/fields',
+        message: 'must be object',
+      },
+    ]);
+  });
+
+  it('allows free-form properties in "fields" for non-strict models"', () => {
+    const filter = {fields: ['test', 'id']};
+    ajv.validate(dynamicCustomerFilterSchema, filter);
+    expect(ajv.errors ?? []).to.be.empty();
+  });
+
+  it('allows only defined properties in "fields" for strict models"', () => {
+    const filter = {fields: ['test']};
+    ajv.validate(customerFilterSchema, filter);
+    expect(ajv.errors ?? []).to.containDeep([
+      {
+        keyword: 'enum',
+        instancePath: '/fields/0',
+        params: {allowedValues: ['id', 'name']},
+        message: 'must be equal to one of the allowed values',
+      },
+    ]);
+  });
+
+  it('rejects "fields" with duplicated items for strict models', () => {
+    const filter = {fields: ['id', 'id']};
+    ajv.validate(customerFilterSchema, filter);
+    expect(ajv.errors ?? []).to.containDeep([
+      {
+        keyword: 'uniqueItems',
+        instancePath: '/fields',
+        message:
+          'must NOT have duplicate items (items ## 1 and 0 are identical)',
+      },
+    ]);
+  });
+
+  it('rejects "fields" with duplicated items for non-strict models', () => {
+    const filter = {fields: ['test', 'test']};
+    ajv.validate(dynamicCustomerFilterSchema, filter);
+    expect(ajv.errors ?? []).to.containDeep([
+      {
+        keyword: 'uniqueItems',
+        instancePath: '/fields',
+        message:
+          'must NOT have duplicate items (items ## 1 and 0 are identical)',
       },
     ]);
   });
@@ -133,8 +180,8 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.include',
-        message: 'should be array',
+        instancePath: '/include',
+        message: 'must be array',
       },
     ]);
   });
@@ -150,8 +197,8 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.offset',
-        message: 'should be integer',
+        instancePath: '/offset',
+        message: 'must be integer',
       },
     ]);
   });
@@ -162,8 +209,8 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.limit',
-        message: 'should be integer',
+        instancePath: '/limit',
+        message: 'must be integer',
       },
     ]);
   });
@@ -174,8 +221,8 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.skip',
-        message: 'should be integer',
+        instancePath: '/skip',
+        message: 'must be integer',
       },
     ]);
   });
@@ -186,19 +233,19 @@ describe('getFilterJsonSchemaFor', () => {
     expect(ajv.errors ?? []).to.containDeep([
       {
         keyword: 'type',
-        dataPath: '.order',
-        message: 'should be string',
+        instancePath: '/order',
+        message: 'must be string',
       },
       {
         keyword: 'type',
-        dataPath: '.order',
-        message: 'should be array',
+        instancePath: '/order',
+        message: 'must be array',
       },
       {
         keyword: 'oneOf',
-        dataPath: '.order',
+        instancePath: '/order',
         params: {passingSchemas: null},
-        message: 'should match exactly one schema in oneOf',
+        message: 'must match exactly one schema in oneOf',
       },
     ]);
   });
@@ -215,7 +262,7 @@ describe('getFilterJsonSchemaFor', () => {
 
   it('returns "include.items.title" when no options were provided', () => {
     expect(customerFilterSchema.properties)
-      .to.have.propertyByPath('include', 'items', 'title')
+      .to.have.propertyByPath('include', 'items', 'anyOf', '0', 'title')
       .to.equal('Customer.IncludeFilter.Items');
   });
 
@@ -224,6 +271,8 @@ describe('getFilterJsonSchemaFor', () => {
       .to.have.propertyByPath(
         'include',
         'items',
+        'anyOf',
+        '0',
         'properties',
         'scope',
         'title',
@@ -294,7 +343,7 @@ describe('getFilterJsonSchemaForOptionsSetTitle', () => {
 
   it('returns "include.items.title" when a single option "setTitle" is set', () => {
     expect(customerFilterSchema.properties)
-      .to.have.propertyByPath('include', 'items', 'title')
+      .to.have.propertyByPath('include', 'items', 'anyOf', '0', 'title')
       .to.equal('Customer.IncludeFilter.Items');
   });
 
@@ -303,6 +352,8 @@ describe('getFilterJsonSchemaForOptionsSetTitle', () => {
       .to.have.propertyByPath(
         'include',
         'items',
+        'anyOf',
+        '0',
         'properties',
         'scope',
         'title',
@@ -330,13 +381,13 @@ describe('getFilterJsonSchemaForOptionsUnsetTitle', () => {
 
   it('no title on include.items when single option "setTitle" is false', () => {
     expect(customerFilterSchema.properties)
-      .propertyByPath('include', 'items')
+      .propertyByPath('include', 'items', 'anyOf', '0')
       .to.not.have.property('title');
   });
 
   it('no title on scope when single option "setTitle" is false', () => {
     expect(customerFilterSchema.properties)
-      .propertyByPath('include', 'items', 'properties', 'scope')
+      .propertyByPath('include', 'items', 'anyOf', '0', 'properties', 'scope')
       .to.not.have.property('title');
   });
 });
@@ -385,7 +436,7 @@ describe('getScopeFilterJsonSchemaFor - nested inclusion', () => {
 });
 
 describe('getWhereJsonSchemaFor', () => {
-  let ajv: Ajv.Ajv;
+  let ajv: Ajv;
   let customerWhereSchema: JsonSchema;
 
   beforeEach(() => {
@@ -498,4 +549,12 @@ class Customer extends Entity {
 
   @hasMany(() => Order)
   orders?: Order[];
+}
+
+@model({
+  settings: {strict: false},
+})
+class DynamicCustomer extends Entity {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }

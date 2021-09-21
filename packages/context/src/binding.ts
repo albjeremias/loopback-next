@@ -5,6 +5,7 @@
 
 import debugFactory from 'debug';
 import {EventEmitter} from 'events';
+import {bindingTemplateFor} from './binding-inspector';
 import {BindingAddress, BindingKey} from './binding-key';
 import {Context} from './context';
 import {inspectInjections} from './inject';
@@ -58,6 +59,10 @@ export enum BindingScope {
   TRANSIENT = 'Transient',
 
   /**
+   * @deprecated Finer-grained scopes such as `APPLICATION`, `SERVER`, or
+   * `REQUEST` should be used instead to ensure the scope of sharing of resolved
+   * binding values.
+   *
    * The binding provides a value as a singleton within each local context. The
    * value is calculated only once per context and cached for subsequential
    * uses. Child contexts have their own value and do not share with their
@@ -79,6 +84,7 @@ export enum BindingScope {
    * 3. `'b1'` is resolved in `app` but not in `req2`, a new value `2` is
    * calculated and used for `req2` afterward
    * - req2.get('b1') ==> 2 (always)
+   *
    */
   CONTEXT = 'Context',
 
@@ -104,6 +110,62 @@ export enum BindingScope {
    * - req2.get('b1') ==> 0 (always)
    */
   SINGLETON = 'Singleton',
+
+  /*
+   * The following scopes are checked against the context hierarchy to find
+   * the first matching context for a given scope in the chain. Resolved binding
+   * values will be cached and shared on the scoped context. This ensures a
+   * binding to have the same value for the scoped context.
+   */
+
+  /**
+   * Application scope
+   *
+   * @remarks
+   * The binding provides an application-scoped value within the context
+   * hierarchy. Resolved value for this binding will be cached and shared for
+   * the same application context (denoted by its scope property set to
+   * `BindingScope.APPLICATION`).
+   *
+   */
+  APPLICATION = 'Application',
+
+  /**
+   * Server scope
+   *
+   * @remarks
+   * The binding provides an server-scoped value within the context hierarchy.
+   * Resolved value for this binding will be cached and shared for the same
+   * server context (denoted by its scope property set to
+   * `BindingScope.SERVER`).
+   *
+   * It's possible that an application has more than one servers configured,
+   * such as a `RestServer` and a `GrpcServer`. Both server contexts are created
+   * with `scope` set to `BindingScope.SERVER`. Depending on where a binding
+   * is resolved:
+   * - If the binding is resolved from the RestServer or below, it will be
+   * cached using the RestServer context as the key.
+   * - If the binding is resolved from the GrpcServer or below, it will be
+   * cached using the GrpcServer context as the key.
+   *
+   * The same binding can resolved/shared/cached for all servers, each of which
+   * has its own value for the binding.
+   */
+  SERVER = 'Server',
+
+  /**
+   * Request scope
+   *
+   * @remarks
+   * The binding provides an request-scoped value within the context hierarchy.
+   * Resolved value for this binding will be cached and shared for the same
+   * request context (denoted by its scope property set to
+   * `BindingScope.REQUEST`).
+   *
+   * The `REQUEST` scope is very useful for controllers, services and artifacts
+   * that want to have a single instance/value for a given request.
+   */
+  REQUEST = 'Request',
 }
 
 /**
@@ -352,23 +414,18 @@ export class Binding<T = BoundValue> extends EventEmitter {
 
   /**
    * Cache the resolved value by the binding scope
-   * @param ctx - The current context
+   * @param resolutionCtx - The resolution context
    * @param result - The calculated value for the binding
    */
   private _cacheValue(
-    ctx: Context,
+    resolutionCtx: Context,
     result: ValueOrPromise<T>,
   ): ValueOrPromise<T> {
     // Initialize the cache as a weakmap keyed by context
     if (!this._cache) this._cache = new WeakMap<Context, ValueOrPromise<T>>();
-    if (this.scope === BindingScope.SINGLETON) {
-      // Cache the value
-      this._cache.set(ctx.getOwnerContext(this.key)!, result);
-    } else if (this.scope === BindingScope.CONTEXT) {
-      // Cache the value at the current context
-      this._cache.set(ctx, result);
+    if (this.scope !== BindingScope.TRANSIENT) {
+      this._cache.set(resolutionCtx!, result);
     }
-    // Do not cache for `TRANSIENT`
     return result;
   }
 
@@ -383,7 +440,7 @@ export class Binding<T = BoundValue> extends EventEmitter {
 
   /**
    * Invalidate the binding cache so that its value will be reloaded next time.
-   * This is useful to force reloading a singleton when its configuration or
+   * This is useful to force reloading a cached value when its configuration or
    * dependencies are changed.
    * **WARNING**: The state held in the cached value will be gone.
    *
@@ -391,15 +448,11 @@ export class Binding<T = BoundValue> extends EventEmitter {
    */
   refresh(ctx: Context) {
     if (!this._cache) return;
-    if (this.scope === BindingScope.SINGLETON) {
-      // Cache the value
-      const ownerCtx = ctx.getOwnerContext(this.key);
-      if (ownerCtx != null) {
-        this._cache.delete(ownerCtx);
+    if (this.scope !== BindingScope.TRANSIENT) {
+      const resolutionCtx = ctx.getResolutionContext(this);
+      if (resolutionCtx != null) {
+        this._cache.delete(resolutionCtx);
       }
-    } else if (this.scope === BindingScope.CONTEXT) {
-      // Cache the value at the current context
-      this._cache.delete(ctx);
     }
   }
 
@@ -451,49 +504,121 @@ export class Binding<T = BoundValue> extends EventEmitter {
     if (debug.enabled) {
       debug('Get value for binding %s', this.key);
     }
+
+    const options = asResolutionOptions(optionsOrSession);
+    const resolutionCtx = this.getResolutionContext(ctx, options);
+    if (resolutionCtx == null) return undefined;
+
+    // Keep a snapshot for proxy
+    const savedSession =
+      ResolutionSession.fork(options.session) ?? new ResolutionSession();
+
     // First check cached value for non-transient
     if (this._cache) {
-      if (this.scope === BindingScope.SINGLETON) {
-        const ownerCtx = ctx.getOwnerContext(this.key);
-        if (ownerCtx && this._cache.has(ownerCtx)) {
-          return this._cache.get(ownerCtx)!;
-        }
-      } else if (this.scope === BindingScope.CONTEXT) {
-        if (this._cache.has(ctx)) {
-          return this._cache.get(ctx)!;
+      if (this.scope !== BindingScope.TRANSIENT) {
+        if (resolutionCtx && this._cache.has(resolutionCtx)) {
+          const value = this._cache.get(resolutionCtx)!;
+          return this.getValueOrProxy(
+            resolutionCtx,
+            {...options, session: savedSession},
+            value,
+          );
         }
       }
     }
-    const options = asResolutionOptions(optionsOrSession);
-    const resolutionCtx = {
-      context: ctx,
+    const resolutionMetadata = {
+      context: resolutionCtx!,
       binding: this,
       options,
     };
     if (typeof this._getValue === 'function') {
       const result = ResolutionSession.runWithBinding(
         s => {
-          const optionsWithSession = {...options, session: s};
+          const optionsWithSession = {
+            ...options,
+            session: s,
+            // Force to be the non-proxy version
+            asProxyWithInterceptors: false,
+          };
           // We already test `this._getValue` is a function. It's safe to assert
           // that `this._getValue` is not undefined.
           return this._getValue!({
-            ...resolutionCtx,
+            ...resolutionMetadata,
             options: optionsWithSession,
           });
         },
         this,
         options.session,
       );
-      return this._cacheValue(ctx, result);
+      const value = this._cacheValue(resolutionCtx!, result);
+      return this.getValueOrProxy(
+        resolutionCtx,
+        {...options, session: savedSession},
+        value,
+      );
     }
     // `@inject.binding` adds a binding without _getValue
     if (options.optional) return undefined;
     return Promise.reject(
       new ResolutionError(
         `No value was configured for binding ${this.key}.`,
-        resolutionCtx,
+        resolutionMetadata,
       ),
     );
+  }
+
+  private getValueOrProxy(
+    resolutionCtx: Context,
+    options: ResolutionOptions,
+    value: ValueOrPromise<T>,
+  ): ValueOrPromise<T> {
+    const session = options.session!;
+    session.pushBinding(this);
+    return Binding.valueOrProxy(
+      {
+        context: resolutionCtx,
+        binding: this,
+        options,
+      },
+      value,
+    );
+  }
+
+  /**
+   * Locate and validate the resolution context
+   * @param ctx - Current context
+   * @param options - Resolution options
+   */
+  private getResolutionContext(ctx: Context, options: ResolutionOptions) {
+    const resolutionCtx = ctx.getResolutionContext(this);
+    switch (this.scope) {
+      case BindingScope.APPLICATION:
+      case BindingScope.SERVER:
+      case BindingScope.REQUEST:
+        if (resolutionCtx == null) {
+          const msg =
+            `Binding "${this.key}" in context "${ctx.name}" cannot` +
+            ` be resolved in scope "${this.scope}"`;
+          if (options.optional) {
+            debug(msg);
+            return undefined;
+          }
+          throw new Error(msg);
+        }
+    }
+
+    const ownerCtx = ctx.getOwnerContext(this.key);
+    if (ownerCtx != null && !ownerCtx.isVisibleTo(resolutionCtx!)) {
+      const msg =
+        `Resolution context "${resolutionCtx?.name}" does not have ` +
+        `visibility to binding "${this.key} (scope:${this.scope})" in context "${ownerCtx.name}"`;
+      if (options.optional) {
+        debug(msg);
+        return undefined;
+      }
+      throw new Error(msg);
+    }
+    return resolutionCtx;
   }
 
   /**
@@ -593,14 +718,6 @@ export class Binding<T = BoundValue> extends EventEmitter {
     // Clear the cache
     this._clearCache();
     this._getValue = resolutionCtx => {
-      if (
-        resolutionCtx.options.asProxyWithInterceptors &&
-        this._source?.type !== BindingType.CLASS
-      ) {
-        throw new Error(
-          `Binding '${this.key}' (${this._source?.type}) does not support 'asProxyWithInterceptors'`,
-        );
-      }
       return getValue(resolutionCtx);
     };
     this.emitChangedEvent('value');
@@ -648,7 +765,9 @@ export class Binding<T = BoundValue> extends EventEmitter {
       type: BindingType.CONSTANT,
       value,
     };
-    this._setValueGetter(() => value);
+    this._setValueGetter(resolutionCtx => {
+      return Binding.valueOrProxy(resolutionCtx, value);
+    });
     return this;
   }
 
@@ -688,8 +807,23 @@ export class Binding<T = BoundValue> extends EventEmitter {
     } else {
       factoryFn = factory;
     }
-    this._setValueGetter(resolutionCtx => factoryFn(resolutionCtx));
+    this._setValueGetter(resolutionCtx => {
+      const value = factoryFn(resolutionCtx);
+      return Binding.valueOrProxy(resolutionCtx, value);
+    });
     return this;
+  }
+
+  private static valueOrProxy<V>(
+    resolutionCtx: ResolutionContext,
+    value: ValueOrPromise<V>,
+  ) {
+    if (!resolutionCtx.options.asProxyWithInterceptors) return value;
+    return createInterceptionProxyFromInstance(
+      value,
+      resolutionCtx.context,
+      resolutionCtx.options.session,
+    );
   }
 
   /**
@@ -717,13 +851,14 @@ export class Binding<T = BoundValue> extends EventEmitter {
       type: BindingType.PROVIDER,
       value: providerClass,
     };
-    this._setValueGetter(({context, options}) => {
+    this._setValueGetter(resolutionCtx => {
       const providerOrPromise = instantiateClass<Provider<T>>(
         providerClass,
-        context,
-        options.session,
+        resolutionCtx.context,
+        resolutionCtx.options.session,
       );
-      return transformValueOrPromise(providerOrPromise, p => p.value());
+      const value = transformValueOrPromise(providerOrPromise, p => p.value());
+      return Binding.valueOrProxy(resolutionCtx, value);
     });
     return this;
   }
@@ -744,15 +879,44 @@ export class Binding<T = BoundValue> extends EventEmitter {
       type: BindingType.CLASS,
       value: ctor,
     };
-    this._setValueGetter(({context, options}) => {
-      const instOrPromise = instantiateClass(ctor, context, options.session);
-      if (!options.asProxyWithInterceptors) return instOrPromise;
-      return createInterceptionProxyFromInstance(
-        instOrPromise,
-        context,
-        options.session,
+    this._setValueGetter(resolutionCtx => {
+      const value = instantiateClass(
+        ctor,
+        resolutionCtx.context,
+        resolutionCtx.options.session,
       );
+      return Binding.valueOrProxy(resolutionCtx, value);
     });
+    return this;
+  }
+
+  /**
+   * Bind to a class optionally decorated with `@injectable`. Based on the
+   * introspection of the class, it calls `toClass/toProvider/toDynamicValue`
+   * internally. The current binding key will be preserved (not being overridden
+   * by the key inferred from the class or options).
+   *
+   * This is similar to {@link createBindingFromClass} but applies to an
+   * existing binding.
+   *
+   * @example
+   *
+   * ```ts
+   * @injectable({scope: BindingScope.SINGLETON, tags: {service: 'MyService}})
+   * class MyService {
+   *   // ...
+   * }
+   *
+   * const ctx = new Context();
+   * ctx.bind('services.MyService').toInjectable(MyService);
+   * ```
+   *
+   * @param ctor - A class decorated with `@injectable`.
+   */
+  toInjectable(
+    ctor: DynamicValueProviderClass<T> | Constructor<T | Provider<T>>,
+  ) {
+    this.apply(bindingTemplateFor(ctor));
     return this;
   }
 
@@ -932,12 +1096,12 @@ function createInterceptionProxyFromInstance<T>(
   session?: ResolutionSession,
 ) {
   return transformValueOrPromise(instOrPromise, inst => {
-    if (typeof inst !== 'object') return inst;
-    return (createProxyWithInterceptors(
+    if (typeof inst !== 'object' || inst == null) return inst;
+    return createProxyWithInterceptors(
       // Cast inst from `T` to `object`
-      (inst as unknown) as object,
+      inst as unknown as object,
       context,
       session,
-    ) as unknown) as T;
+    ) as unknown as T;
   });
 }

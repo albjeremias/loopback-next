@@ -1,17 +1,24 @@
 {
   "name": "@loopback/example-lb3-application",
-  "version": "2.4.4",
   "description": "Tutorial example on how to add existing an LB3 application to a LB4 project",
+  "version": "3.0.1",
+  "keywords": [
+    "loopback",
+    "LoopBack",
+    "example"
+  ],
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "engines": {
-    "node": ">=10.16"
-  },
   "author": "IBM Corp.",
   "copyright.owner": "IBM Corp.",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "examples/lb3-application"
+  },
+  "engines": {
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "build": "lb-tsc",
@@ -24,7 +31,7 @@
     "prettier:fix": "npm run prettier:cli -- --write",
     "eslint": "lb-eslint --report-unused-disable-directives .",
     "eslint:fix": "npm run eslint -- --fix",
-    "pretest": "npm run build",
+    "pretest": "npm run rebuild",
     "test": "lb-mocha \"dist/__tests__/**/*.js\" \"lb3app/test/*.js\"",
     "test:dev": "lb-mocha --allow-console-logs dist/__tests__/**/*.js && npm run posttest",
     "verify": "npm pack && tar xf loopback-lb3-application*.tgz && tree package && npm run clean",
@@ -32,45 +39,39 @@
     "migrate": "node ./dist/migrate",
     "preopenapi-spec": "npm run build",
     "openapi-spec": "node ./dist/openapi-spec",
-    "prestart": "npm run build",
+    "rebuild": "npm run clean && npm run build",
+    "prestart": "npm run rebuild",
     "start": "node ."
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "examples/lb3-application"
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
-    "@loopback/boot": "^3.0.1",
-    "@loopback/booter-lb3app": "^2.2.11",
-    "@loopback/core": "^2.10.1",
-    "@loopback/repository": "^3.0.1",
-    "@loopback/rest": "^7.0.1",
-    "@loopback/rest-explorer": "^3.0.1",
+    "@loopback/boot": "^3.4.3",
+    "@loopback/booter-lb3app": "^2.4.3",
+    "@loopback/core": "^2.17.0",
+    "@loopback/repository": "^3.7.2",
+    "@loopback/rest": "^10.0.1",
+    "@loopback/rest-explorer": "^3.3.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
-    "debug": "^4.2.0",
+    "debug": "^4.3.2",
     "express": "^4.17.1",
-    "helmet": "^4.1.1",
-    "loopback": "^3.27.0",
+    "helmet": "^4.6.0",
+    "loopback": "^3.28.0",
     "loopback-boot": "^3.3.1",
-    "tslib": "^2.0.1"
+    "tslib": "^2.3.1"
   },
   "devDependencies": {
-    "@loopback/build": "^6.2.4",
-    "@loopback/eslint-config": "^10.0.0",
-    "@loopback/rest": "^1.11.1",
-    "@loopback/testlab": "^3.2.6",
-    "@types/lodash": "^4.14.161",
-    "@types/node": "^10.17.35",
-    "eslint": "^7.9.0",
-    "lodash": "^4.17.20",
+    "@loopback/build": "^7.0.1",
+    "@loopback/eslint-config": "^11.0.1",
+    "@loopback/rest": "^10.0.1",
+    "@loopback/testlab": "^3.4.3",
+    "@types/lodash": "^4.14.173",
+    "@types/node": "^10.17.60",
+    "eslint": "^7.32.0",
+    "lodash": "^4.17.21",
     "should": "^13.2.3",
-    "typescript": "~4.0.3"
-  },
-  "keywords": [
-    "loopback",
-    "LoopBack",
-    "example"
-  ]
+    "typescript": "~4.3.5"
+  }
 }

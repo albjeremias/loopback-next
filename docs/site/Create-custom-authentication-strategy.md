@@ -94,15 +94,15 @@ export class BasicAuthenticationStrategy implements AuthenticationStrategy {
 
 As you can see in the example, an authentication strategy can inject custom
 services to help it accomplish certain tasks. See the complete examples for
-[basic authentication strategy](https://github.com/strongloop/loopback-next/blob/master/packages/authentication/src/__tests__/fixtures/strategies/basic-strategy.ts)
+[basic authentication strategy](https://github.com/loopbackio/loopback-next/blob/master/packages/authentication/src/__tests__/fixtures/strategies/basic-strategy.ts)
 and
-[jwt authentication strategy](https://github.com/strongloop/loopback-next/blob/master/packages/authentication/src/__tests__/fixtures/strategies/jwt-strategy.ts).
+[jwt authentication strategy](https://github.com/loopbackio/loopback-next/blob/master/packages/authentication/src/__tests__/fixtures/strategies/jwt-strategy.ts).
 
 The `AuthenticationComponent` component also provides two **optional** service
 interfaces which may be of use to your application:
-[UserService](https://github.com/strongloop/loopback-next/blob/master/packages/authentication/src/services/user.service.ts)
+[UserService](https://github.com/loopbackio/loopback-next/blob/master/packages/authentication/src/services/user.service.ts)
 and
-[TokenService](https://github.com/strongloop/loopback-next/blob/master/packages/authentication/src/services/token.service.ts).
+[TokenService](https://github.com/loopbackio/loopback-next/blob/master/packages/authentication/src/services/token.service.ts).
 
 ## Registering a Custom Authentication Strategy
 
@@ -137,7 +137,8 @@ point**.
   {scope: BindingScope.TRANSIENT},
 ) //this needs to be transient, e.g. for request level context.
 export class AuthenticationStrategyProvider
-  implements Provider<AuthenticationStrategy | undefined> {
+  implements Provider<AuthenticationStrategy | undefined>
+{
   constructor(
     @extensions()
     private authenticationStrategies: Getter<AuthenticationStrategy[]>,

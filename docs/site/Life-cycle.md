@@ -12,7 +12,9 @@ A LoopBack application has its own life cycles at runtime. There are a few
 methods to control the transition of states of `Application`.
 
 - boot(): Boot the application
-- start(): Start the application
+- init(): Initialize the application (it happens at most once per application)
+- start(): Start the application. It will automatically call `init()` if the
+  application is not initialized
 - stop(): Stop the application
 
 ## Application states
@@ -38,12 +40,17 @@ The state can transition as follows by operations including `boot`, `start`, and
     - !booted -> booting -> booted
     - booting | booted -> booted (no-op)
 
-2.  start()
+2.  init()
+
+    - !initialized -> initializing -> initialized
+    - initializing | initialized -> initialized (no-op)
+
+3.  start()
 
     - !started -> starting -> started
     - starting | started -> started (no-op)
 
-3.  stop()
+4.  stop()
 
     - started -> stopping -> stopped
     - stopping | !started -> stopped (no-op)
@@ -156,13 +163,44 @@ import {ValueOrPromise} from '@loopback/core';
  * Observers to handle life cycle start/stop events
  */
 export interface LifeCycleObserver {
-  start?(): ValueOrPromise<void>;
-  stop?(): ValueOrPromise<void>;
+  /**
+   * The method to be invoked during `init`. It will only be called at most once
+   * for a given application instance.
+   */
+  init?(...injectedArgs: unknown[]): ValueOrPromise<void>;
+  /**
+   * The method to be invoked during `start`
+   */
+  start?(...injectedArgs: unknown[]): ValueOrPromise<void>;
+  /**
+   * The method to be invoked during `stop`
+   */
+  stop?(...injectedArgs: unknown[]): ValueOrPromise<void>;
 }
 ```
 
-Both `start` and `stop` methods are optional so that an observer can opt in
+`init`, `start` and `stop` methods are optional so that an observer can opt in
 certain events.
+
+Method injection is allowed for the lifecycle methods. For example,
+
+```ts
+class MyObserverWithMethodInjection implements LifeCycleObserver {
+  status = 'not-initialized';
+
+  init(@inject('prefix') prefix: string) {
+    this.status = `${prefix}:initialized`;
+  }
+
+  start(@inject('prefix') prefix: string) {
+    this.status = `${prefix}:started`;
+  }
+
+  stop(@inject('prefix') prefix: string) {
+    this.status = `${prefix}:stopped`;
+  }
+}
+```
 
 ## Register a life cycle observer
 

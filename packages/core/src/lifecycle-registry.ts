@@ -5,8 +5,10 @@
 
 import {
   Binding,
+  Context,
   ContextView,
   inject,
+  invokeMethod,
   sortBindingsByPhase,
 } from '@loopback/context';
 import {CoreBindings, CoreTags} from './keys';
@@ -37,6 +39,12 @@ export type LifeCycleObserverOptions = {
    */
   orderedGroups: string[];
   /**
+   * Override and disable lifecycle observer groups. This setting applies to
+   * both ordered groups (i.e. those defined in `orderedGroups`) and unordered
+   * groups.
+   */
+  disabledGroups?: string[];
+  /**
    * Notify observers of the same group in parallel, default to `true`
    */
   parallel?: boolean;
@@ -49,6 +57,8 @@ export const DEFAULT_ORDERED_GROUPS = ['server'];
  */
 export class LifeCycleObserverRegistry implements LifeCycleObserver {
   constructor(
+    @inject.context()
+    protected readonly context: Context,
     @inject.view(lifeCycleObserverFilter)
     protected readonly observersView: ContextView<LifeCycleObserver>,
     @inject(CoreBindings.LIFE_CYCLE_OBSERVER_OPTIONS, {optional: true})
@@ -112,10 +122,8 @@ export class LifeCycleObserverRegistry implements LifeCycleObserver {
     bindings: Readonly<Binding<LifeCycleObserver>>[],
   ) {
     // Group bindings in a map
-    const groupMap: Map<
-      string,
-      Readonly<Binding<LifeCycleObserver>>[]
-    > = new Map();
+    const groupMap: Map<string, Readonly<Binding<LifeCycleObserver>>[]> =
+      new Map();
     sortBindingsByPhase(
       bindings,
       CoreTags.LIFE_CYCLE_OBSERVER_GROUP,
@@ -180,7 +188,11 @@ export class LifeCycleObserverRegistry implements LifeCycleObserver {
     event: keyof LifeCycleObserver,
   ) {
     if (typeof observer[event] === 'function') {
-      await observer[event]!();
+      // Supply `undefined` for legacy callback function expected by
+      // DataSource.stop()
+      await invokeMethod(observer, event, this.context, [undefined], {
+        skipInterceptors: true,
+      });
     }
   }
 
@@ -196,11 +208,19 @@ export class LifeCycleObserverRegistry implements LifeCycleObserver {
   ) {
     const observers = await this.observersView.values();
     const bindings = this.observersView.bindings;
+    const found = observers.some(observer =>
+      events.some(e => typeof observer[e] === 'function'),
+    );
+    if (!found) return;
     if (reverse) {
       // Do not reverse the original `groups` in place
       groups = [...groups].reverse();
     }
     for (const group of groups) {
+      if (this.options.disabledGroups?.includes(group.group)) {
+        debug('Notification skipped (Group is disabled): %s', group.group);
+        continue;
+      }
       const observersForGroup: LifeCycleObserver[] = [];
       const bindingsInGroup = reverse
         ? group.bindings.reverse()
@@ -216,6 +236,15 @@ export class LifeCycleObserverRegistry implements LifeCycleObserver {
         debug('Finished notification %s of %s', event);
       }
     }
+  }
+
+  /**
+   * Notify all life cycle observers by group of `init`
+   */
+  public async init(): Promise<void> {
+    debug('Initializing the %s...');
+    const groups = this.getObserverGroupsByOrder();
+    await this.notifyGroups(['init'], groups);
   }
 
   /**

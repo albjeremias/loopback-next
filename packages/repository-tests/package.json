@@ -1,11 +1,19 @@
 {
   "name": "@loopback/repository-tests",
-  "version": "0.13.1",
   "description": "A shared test suite to verify `@loopback/repository` functionality with a given compatible connector",
+  "version": "0.18.3",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "IBM Corp.",
+  "copyright.owner": "IBM Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "packages/repository-tests"
+  },
   "engines": {
-    "node": ">=10.16"
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "build": "lb-tsc",
@@ -14,30 +22,8 @@
     "test": "lb-mocha \"dist/__tests__/**/*.js\"",
     "verify": "npm pack && tar xf loopback-repository*.tgz && tree package && npm run clean"
   },
-  "author": "IBM Corp.",
-  "copyright.owner": "IBM Corp.",
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
-  },
-  "peerDependencies": {
-    "@loopback/core": "^2.10.1",
-    "@loopback/repository": "^3.0.1"
-  },
-  "devDependencies": {
-    "@loopback/build": "^1.7.1",
-    "@loopback/core": "^2.10.1",
-    "@loopback/repository": "^3.0.1",
-    "@types/debug": "^4.1.5",
-    "@types/lodash": "^4.14.161",
-    "@types/node": "^10.17.35",
-    "lodash": "^4.17.20"
-  },
-  "dependencies": {
-    "@loopback/testlab": "^3.2.6",
-    "@types/debug": "^4.1.5",
-    "debug": "^4.2.0",
-    "tslib": "^2.0.1"
   },
   "files": [
     "README.md",
@@ -45,9 +31,23 @@
     "src",
     "!*/__tests__"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "packages/repository-tests"
+  "peerDependencies": {
+    "@loopback/core": "^2.17.0",
+    "@loopback/repository": "^3.7.2"
+  },
+  "dependencies": {
+    "@loopback/testlab": "^3.4.3",
+    "@types/debug": "^4.1.7",
+    "debug": "^4.3.2",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.1",
+    "@loopback/core": "^2.17.0",
+    "@loopback/repository": "^3.7.2",
+    "@types/debug": "^4.1.7",
+    "@types/lodash": "^4.14.173",
+    "@types/node": "^10.17.60",
+    "lodash": "^4.17.21"
   }
 }

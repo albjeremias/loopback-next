@@ -15,7 +15,9 @@ import {
 } from '../..';
 import {resolveHasManyMetaHelper} from './has-many.helpers';
 
-const debug = debugFactory('loopback:repository:has-many-through-helpers');
+const debug = debugFactory(
+  'loopback:repository:relations:has-many-through:helpers',
+);
 
 export type HasManyThroughResolvedDefinition = HasManyDefinition & {
   keyTo: string;
@@ -66,7 +68,7 @@ export type HasManyThroughResolvedDefinition = HasManyDefinition & {
  */
 export function createTargetConstraintFromThrough<
   Target extends Entity,
-  Through extends Entity
+  Through extends Entity,
 >(
   relationMeta: HasManyThroughResolvedDefinition,
   throughInstances: Through[],
@@ -123,7 +125,7 @@ export function createTargetConstraintFromThrough<
  */
 export function getTargetKeysFromThroughModels<
   Through extends Entity,
-  TargetID
+  TargetID,
 >(
   relationMeta: HasManyThroughResolvedDefinition,
   throughInstances: Through[],
@@ -164,7 +166,7 @@ export function getTargetKeysFromThroughModels<
  */
 export function createThroughConstraintFromSource<
   Through extends Entity,
-  SourceID
+  SourceID,
 >(
   relationMeta: HasManyThroughResolvedDefinition,
   fkValue: SourceID,
@@ -252,7 +254,7 @@ export function getTargetIdsFromTargetModels<Target extends Entity, TargetID>(
  */
 export function createThroughConstraintFromTarget<
   Through extends Entity,
-  TargetID
+  TargetID,
 >(
   relationMeta: HasManyThroughResolvedDefinition,
   fkValues: TargetID[],

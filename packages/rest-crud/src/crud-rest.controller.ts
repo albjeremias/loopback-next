@@ -65,7 +65,7 @@ export interface CrudRestController<
   IdType,
   IdName extends keyof T,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Relations extends object = {}
+  Relations extends object = {},
 > {
   /**
    * The backing repository used to access & modify model data.
@@ -86,7 +86,7 @@ export interface CrudRestControllerCtor<
   T extends Entity,
   IdType,
   IdName extends keyof T,
-  Relations extends object = {}
+  Relations extends object = {},
 > {
   new (
     repository: EntityCrudRepository<T, IdType, Relations>,
@@ -131,7 +131,7 @@ export function defineCrudRestController<
   T extends Entity,
   IdType,
   IdName extends keyof T,
-  Relations extends object = {}
+  Relations extends object = {},
 >(
   modelCtor: typeof Entity & {prototype: T & {[key in IdName]: IdType}},
   options: CrudRestControllerOptions,
@@ -145,7 +145,8 @@ export function defineCrudRestController<
 
   @api({basePath: options.basePath, paths: {}})
   class CrudRestControllerImpl
-    implements CrudRestController<T, IdType, IdName> {
+    implements CrudRestController<T, IdType, IdName>
+  {
     constructor(
       public readonly repository: EntityCrudRepository<T, IdType, Relations>,
     ) {}
@@ -283,7 +284,7 @@ function getIdSchema<T extends Entity>(
 }
 
 // Temporary implementation of a short-hand version of `@requestBody`
-// See https://github.com/strongloop/loopback-next/issues/3493
+// See https://github.com/loopbackio/loopback-next/issues/3493
 function body<T extends Entity>(
   modelCtor: Function & {prototype: T},
   options?: JsonSchemaOptions<T>,
@@ -298,7 +299,7 @@ function body<T extends Entity>(
 }
 
 // Temporary workaround for a missing `@response` decorator
-// See https://github.com/strongloop/loopback-next/issues/1672
+// See https://github.com/loopbackio/loopback-next/issues/1672
 // Please note this is just a workaround, the real helper should be implemented
 // as a decorator that contributes OpenAPI metadata in a way that allows
 // `@post` to merge the responses with the metadata provided at operation level

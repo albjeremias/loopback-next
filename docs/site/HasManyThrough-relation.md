@@ -14,7 +14,7 @@ permalink: /doc/en/lb4/HasManyThrough-relation.html
 This relation best works with databases that support foreign key
 constraints (SQL).
 Using this relation with NoSQL databases will result in unexpected behavior,
-such as the ability to create a relation with a model that does not exist. We are [working on a solution](https://github.com/strongloop/loopback-next/issues/2341) to better handle this. It is fine to use this relation with NoSQL databases for purposes such as navigating related models, where the referential integrity is not critical.
+such as the ability to create a relation with a model that does not exist. We are [working on a solution](https://github.com/loopbackio/loopback-next/issues/2341) to better handle this. It is fine to use this relation with NoSQL databases for purposes such as navigating related models, where the referential integrity is not critical.
 " %}
 
 A `hasManyThrough` relation denotes a many-to-many connection with another
@@ -122,7 +122,9 @@ export class Patient extends Entity {
     id: true,
   })
   pid: number;
+
   // other properties
+}
 ```
 
 The definition of the `hasManyThrough` relation is inferred by using the
@@ -330,6 +332,9 @@ export class DoctorRepository extends DefaultCrudRepository<
   ([API Docs](https://loopback.io/doc/en/lb4/apidocs.repository.defaulthasmanythroughrepository.link.html))
 - `unlink` for unlinking a target model instance from source model instance
   ([API Docs](https://loopback.io/doc/en/lb4/apidocs.repository.defaulthasmanythroughrepository.unlink.html))
+- `unlinkAll` for unlinking all target model instances from source model
+  instance
+  ([API Docs](https://loopback.io/doc/en/lb4/apidocs.repository.defaulthasmanythroughrepository.unlinkAll.html))
 
 Here are examples of applying CRUD APIs with constrained target repository
 factory `patients` for instances of `doctorRepository`:
@@ -464,13 +469,13 @@ allows users to retrieve all doctors along with their related patients through
 the following code at the repository level:
 
 ```ts
-doctorRepository.find({include: [{relation: 'patients'}]});
+doctorRepository.find({include: ['patients']});
 ```
 
 or use APIs with controllers:
 
 ```
-GET http://localhost:3000/doctors?filter[include][][relation]=patients
+GET http://localhost:3000/doctors?filter[include][]=patients
 ```
 
 ### Enable/disable the inclusion resolvers
@@ -527,13 +532,13 @@ export class DoctorRepository extends DefaultCrudRepository<
   if you process data at the repository level:
 
   ```ts
-  doctorRepository.find({include: [{relation: 'patients'}]});
+  doctorRepository.find({include: ['patients']});
   ```
 
   this is the same as the url:
 
   ```
-  GET http://localhost:3000/doctors?filter[include][][relation]=patients
+  GET http://localhost:3000/doctors?filter[include][]=patients
   ```
 
   which returns:
@@ -552,9 +557,6 @@ export class DoctorRepository extends DefaultCrudRepository<
     },
   ];
   ```
-
-{% include note.html content="The query syntax is a slightly different from LB3. We are also working on simplifying the query syntax. Check our GitHub issue for more information:
-[Simpler Syntax for Inclusion](https://github.com/strongloop/loopback-next/issues/3205)" %}
 
 - You can delete a relation from `inclusionResolvers` to disable the inclusion
   for a certain relation. e.g
@@ -605,7 +607,7 @@ them.
 The type of `patientData` above will possibly change to `Partial<Patient>` to exclude
 certain properties from the JSON/OpenAPI spec schema built for the `requestBody`
 payload. See its [GitHub
-issue](https://github.com/strongloop/loopback-next/issues/1179) to follow the discussion.
+issue](https://github.com/loopbackio/loopback-next/issues/1179) to follow the discussion.
 " %}
 
 ## Features on the way

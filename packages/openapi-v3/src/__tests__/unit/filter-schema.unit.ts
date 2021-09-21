@@ -22,6 +22,7 @@ describe('filterSchema', () => {
     expect(MyUserModel.definition.name).to.eql('my-user-model');
     expect(schema).to.eql({
       title: 'my-user-model.Filter',
+      type: 'object',
       'x-typescript-type': '@loopback/repository#Filter<MyUserModel>',
       properties: {
         where: {
@@ -30,13 +31,30 @@ describe('filterSchema', () => {
           additionalProperties: true,
         },
         fields: {
-          type: 'object',
+          oneOf: [
+            {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                id: {
+                  type: 'boolean',
+                },
+                age: {
+                  type: 'boolean',
+                },
+              },
+            },
+            {
+              type: 'array',
+              uniqueItems: true,
+              items: {
+                enum: ['id', 'age'],
+                type: 'string',
+                example: 'id',
+              },
+            },
+          ],
           title: 'my-user-model.Fields',
-          properties: {
-            id: {type: 'boolean'},
-            age: {type: 'boolean'},
-          },
-          additionalProperties: false,
         },
         offset: {type: 'integer', minimum: 0},
         limit: {type: 'integer', minimum: 1, example: 100},
@@ -54,16 +72,34 @@ describe('filterSchema', () => {
     expect(MyUserModel.definition.name).to.eql('my-user-model');
     expect(schema).to.eql({
       title: 'my-user-model.Filter',
+      type: 'object',
       'x-typescript-type': '@loopback/repository#Filter<MyUserModel>',
       properties: {
         fields: {
-          type: 'object',
+          oneOf: [
+            {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                id: {
+                  type: 'boolean',
+                },
+                age: {
+                  type: 'boolean',
+                },
+              },
+            },
+            {
+              type: 'array',
+              uniqueItems: true,
+              items: {
+                enum: ['id', 'age'],
+                type: 'string',
+                example: 'id',
+              },
+            },
+          ],
           title: 'my-user-model.Fields',
-          properties: {
-            id: {type: 'boolean'},
-            age: {type: 'boolean'},
-          },
-          additionalProperties: false,
         },
         offset: {type: 'integer', minimum: 0},
         limit: {type: 'integer', minimum: 1, example: 100},
@@ -90,6 +126,7 @@ describe('filterSchema', () => {
     expect(CustomUserModel.definition.name).to.eql('CustomUserModel');
     expect(schema).to.eql({
       title: 'CustomUserModel.Filter',
+      type: 'object',
       'x-typescript-type': '@loopback/repository#Filter<CustomUserModel>',
       properties: {
         where: {
@@ -98,13 +135,30 @@ describe('filterSchema', () => {
           additionalProperties: true,
         },
         fields: {
-          type: 'object',
+          oneOf: [
+            {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                id: {
+                  type: 'boolean',
+                },
+                age: {
+                  type: 'boolean',
+                },
+              },
+            },
+            {
+              type: 'array',
+              uniqueItems: true,
+              items: {
+                enum: ['id', 'age'],
+                type: 'string',
+                example: 'id',
+              },
+            },
+          ],
           title: 'CustomUserModel.Fields',
-          properties: {
-            id: {type: 'boolean'},
-            age: {type: 'boolean'},
-          },
-          additionalProperties: false,
         },
         offset: {type: 'integer', minimum: 0},
         limit: {type: 'integer', minimum: 1, example: 100},

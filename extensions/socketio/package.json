@@ -1,0 +1,67 @@
+{
+  "name": "@loopback/socketio",
+  "description": "LoopBack's WebSocket server based on socket.io",
+  "version": "0.3.3",
+  "keywords": [
+    "LoopBack",
+    "Socket.IO",
+    "WebSocket",
+    "extension",
+    "socket",
+    "socketio"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "IBM Corp.",
+  "copyright.owner": "IBM Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "extensions/socketio"
+  },
+  "engines": {
+    "node": "^10.16 || 12 || 14 || 16"
+  },
+  "scripts": {
+    "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
+    "build": "lb-tsc",
+    "clean": "lb-clean loopback-socketio*.tgz dist package *.tsbuildinfo",
+    "pretest": "npm run build",
+    "test": "lb-mocha --allow-console-logs \"dist/__tests__/unit/**/*.js\" \"dist/__tests__/acceptance/**/*.js\"",
+    "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
+    "verify": "npm pack && tar xf loopback-socketio*.tgz && tree package && npm run clean"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "src",
+    "!*/__tests__"
+  ],
+  "peerDependencies": {
+    "@loopback/boot": "^3.4.3",
+    "@loopback/core": "^2.17.0"
+  },
+  "dependencies": {
+    "@loopback/http-server": "^2.5.3",
+    "@types/cors": "^2.8.12",
+    "@types/lodash": "^4.14.173",
+    "cors": "^2.8.5",
+    "debug": "^4.3.2",
+    "lodash": "^4.17.21",
+    "socket.io": "^4.2.0"
+  },
+  "devDependencies": {
+    "@loopback/boot": "^3.4.3",
+    "@loopback/build": "^7.0.1",
+    "@loopback/core": "^2.17.0",
+    "@loopback/eslint-config": "^11.0.1",
+    "@loopback/testlab": "^3.4.3",
+    "@types/debug": "^4.1.7",
+    "p-event": "^4.2.0",
+    "socket.io-client": "^4.2.0"
+  }
+}

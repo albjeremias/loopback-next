@@ -1,17 +1,34 @@
 {
   "name": "@loopback/tsdocs",
-  "version": "2.3.2",
-  "description": "An internal package to generate api docs using Microsoft api-extractor and api-documenter",
-  "private": true,
+  "description": "A package to generate api docs using Microsoft api-extractor and api-documenter",
+  "version": "2.6.3",
+  "keywords": [
+    "LoopBack",
+    "Apidocs",
+    "Reflect"
+  ],
+  "license": "MIT",
+  "bin": {
+    "lb-extract-apidocs": "./bin/extract-apis.js",
+    "lb-document-apidocs": "./bin/document-apis.js",
+    "lb-update-apidocs": "./bin/update-apidocs.js"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "IBM Corp.",
+  "copyright.owner": "IBM Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "packages/tsdocs"
+  },
   "engines": {
-    "node": ">=10.16"
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "build:tsdocs": "npm run build && npm run -s extract-apidocs && npm run -s document-apidocs && npm run -s update-apidocs",
     "extract-apidocs": "node bin/extract-apis",
-    "document-apidocs": "api-documenter markdown -i ../../docs/apidocs/models -o ../../docs/site/apidocs",
+    "document-apidocs": "node bin/document-apis markdown -i ../../docs/apidocs/models -o ../../docs/site/apidocs",
     "update-apidocs": "node bin/update-apidocs",
     "build": "lb-tsc",
     "build:fixtures": "npm run build --prefix fixtures/monorepo",
@@ -20,30 +37,9 @@
     "test": "lb-mocha \"dist/__tests__/**/*.js\"",
     "verify": "npm pack && tar xf loopback-tsdocs*.tgz && tree package && npm run clean"
   },
-  "author": "IBM Corp.",
-  "copyright.owner": "IBM Corp.",
-  "license": "MIT",
-  "dependencies": {
-    "@microsoft/api-documenter": "^7.8.56",
-    "@microsoft/api-extractor": "^7.9.22",
-    "debug": "^4.2.0",
-    "fs-extra": "^9.0.1",
-    "tslib": "^2.0.1"
+  "publishConfig": {
+    "access": "public"
   },
-  "devDependencies": {
-    "@loopback/build": "^6.2.4",
-    "@loopback/eslint-config": "^10.0.0",
-    "@loopback/testlab": "^3.2.6",
-    "@loopback/tsdocs-monorepo": "^0.0.9",
-    "@types/debug": "^4.1.5",
-    "@types/fs-extra": "^9.0.1",
-    "@types/node": "^10.17.35"
-  },
-  "keywords": [
-    "LoopBack",
-    "Apidocs",
-    "Reflect"
-  ],
   "files": [
     "README.md",
     "dist",
@@ -51,9 +47,20 @@
     "!*/__tests__",
     "!/fixtures"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "packages/tsdocs"
+  "dependencies": {
+    "@microsoft/api-documenter": "^7.13.50",
+    "@microsoft/api-extractor": "^7.18.9",
+    "debug": "^4.3.2",
+    "fs-extra": "^10.0.0",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.1",
+    "@loopback/eslint-config": "^11.0.1",
+    "@loopback/testlab": "^3.4.3",
+    "@loopback/tsdocs-monorepo": "^0.1.3",
+    "@types/debug": "^4.1.7",
+    "@types/fs-extra": "^9.0.12",
+    "@types/node": "^10.17.60"
   }
 }

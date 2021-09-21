@@ -3,13 +3,19 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {Context, CoreBindings, inject, Server} from '@loopback/core';
+import {
+  BindingScope,
+  Context,
+  CoreBindings,
+  inject,
+  Server,
+} from '@loopback/core';
 import {HttpOptions, HttpServer, HttpsOptions} from '@loopback/http-server';
 import debugFactory from 'debug';
 import express from 'express';
 import {toExpressMiddleware} from './middleware';
 import {BaseMiddlewareRegistry} from './middleware-registry';
-import {MiddlewareContext, MIDDLEWARE_CONTEXT, Request} from './types';
+import {getMiddlewareContext, MiddlewareContext, Request} from './types';
 
 const debug = debugFactory('loopback:middleware');
 
@@ -51,6 +57,7 @@ export class ExpressServer extends BaseMiddlewareRegistry implements Server {
     parent?: Context,
   ) {
     super(parent);
+    this.scope = BindingScope.SERVER;
     let basePath = config?.basePath ?? '';
     // Trim leading and trailing `/`
     basePath = basePath.replace(/(^\/)|(\/$)/, '');
@@ -112,7 +119,6 @@ export class ExpressServer extends BaseMiddlewareRegistry implements Server {
    * @param request - Request object
    */
   getMiddlewareContext(request: Request): MiddlewareContext | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (request as any)[MIDDLEWARE_CONTEXT];
+    return getMiddlewareContext(request);
   }
 }

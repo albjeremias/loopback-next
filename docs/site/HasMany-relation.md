@@ -14,7 +14,7 @@ permalink: /doc/en/lb4/HasMany-relation.html
 This relation best works with databases that support foreign key
 constraints (SQL).
 Using this relation with NoSQL databases will result in unexpected behavior,
-such as the ability to create a relation with a model that does not exist. We are [working on a solution](https://github.com/strongloop/loopback-next/issues/2341) to better handle this. It is fine to use this relation with NoSQL databases for purposes such as navigating related models, where the referential integrity is not critical.
+such as the ability to create a relation with a model that does not exist. We are [working on a solution](https://github.com/loopbackio/loopback-next/issues/2341) to better handle this. It is fine to use this relation with NoSQL databases for purposes such as navigating related models, where the referential integrity is not critical.
 " %}
 
 A `hasMany` relation denotes a one-to-many connection of a model to another
@@ -320,7 +320,7 @@ export class Review extends Entity {
 }
 ```
 
-{% include important.html content="It is user's responsibility to make sure the non-id source key doesn't have duplicate value. Besides, LB4 doesn't support composite keys for now. e.g joining two tables with more than one source key. Related GitHub issue: [Composite primary/foreign keys](https://github.com/strongloop/loopback-next/issues/1830)" %}
+{% include important.html content="It is user's responsibility to make sure the non-id source key doesn't have duplicate value. Besides, LB4 doesn't support composite keys for now. e.g joining two tables with more than one source key. Related GitHub issue: [Composite primary/foreign keys](https://github.com/loopbackio/loopback-next/issues/1830)" %}
 
 If you need to use _different names for models and database columns_, to use
 `my_orders` as db column name other than `orders` for example, the following
@@ -489,7 +489,7 @@ new `CustomerOrdersController` class for them.
 The type of `orderData` above will possibly change to `Partial<Order>` to exclude
 certain properties from the JSON/OpenAPI spec schema built for the `requestBody`
 payload. See its [GitHub
-issue](https://github.com/strongloop/loopback-next/issues/1179) to follow the discussion.
+issue](https://github.com/loopbackio/loopback-next/issues/1179) to follow the discussion.
 " %}
 
 ## Querying related models
@@ -513,13 +513,13 @@ allows users to retrieve all customers along with their related orders through
 the following code at the repository level:
 
 ```ts
-customerRepo.find({include: [{relation: 'orders'}]});
+customerRepo.find({include: ['orders']});
 ```
 
 or use APIs with controllers:
 
 ```
-GET http://localhost:3000/customers?filter[include][][relation]=orders
+GET http://localhost:3000/customers?filter[include][]=orders
 ```
 
 ### Enable/disable the inclusion resolvers
@@ -565,13 +565,13 @@ export class CustomerRepository extends DefaultCrudRepository {
   if you process data at the repository level:
 
   ```ts
-  customerRepository.find({include: [{relation: 'orders'}]});
+  customerRepository.find({include: ['orders']});
   ```
 
   this is the same as the url:
 
   ```
-  GET http://localhost:3000/customers?filter[include][][relation]=orders
+  GET http://localhost:3000/customers?filter[include][]=orders
   ```
 
   which returns:
@@ -593,9 +593,6 @@ export class CustomerRepository extends DefaultCrudRepository {
     },
   ];
   ```
-
-{% include note.html content="The query syntax is a slightly different from LB3. We are also thinking about simplifying the query syntax. Check our GitHub issue for more information:
-[Simpler Syntax for Inclusion](https://github.com/strongloop/loopback-next/issues/3205)" %}
 
 Here is a diagram to make this more intuitive:
 
@@ -621,7 +618,7 @@ To query **multiple relations**, for example, return all customers including
 their orders and address, in Node API:
 
 ```ts
-customerRepo.find({include: [{relation: 'orders'}, {relation: 'address'}]});
+customerRepo.find({include: ['orders', 'address']});
 ```
 
 Equivalently, with url, you can do:
@@ -666,7 +663,7 @@ customerRepo.find({
     {
       relation: 'orders',
       scope: {
-        include: [{relation: 'manufacturers'}],
+        include: ['manufacturers'],
       },
     },
   ],
@@ -725,7 +722,7 @@ customerRepo.find({
       relation: 'orders',
       scope: {
         where: {name: 'ToysRUs'},
-        include: [{relation: 'manufacturers'}],
+        include: ['manufacturers'],
       },
     },
   ],

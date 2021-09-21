@@ -5,13 +5,13 @@
 
 import {Getter} from '@loopback/core';
 import {
+  createHasManyRepositoryFactory,
+  HasManyDefinition,
   HasManyRepositoryFactory,
   juggler,
-  HasManyDefinition,
-  createHasManyRepositoryFactory,
 } from '@loopback/repository';
-import {Order, Shipment, ShipmentRelations} from '../models';
 import {CrudRepositoryCtor} from '../../../..';
+import {Order, Shipment, ShipmentRelations} from '../models';
 
 // create the ShipmentRepo by calling this func so that it can be extended from CrudRepositoryCtor
 export function createShipmentRepo(repoClass: CrudRepositoryCtor) {
@@ -30,9 +30,8 @@ export function createShipmentRepo(repoClass: CrudRepositoryCtor) {
       orderRepositoryGetter: Getter<typeof repoClass.prototype>,
     ) {
       super(Shipment, db);
-      const shipmentOrdersMeta = this.entityClass.definition.relations[
-        'shipmentOrders'
-      ];
+      const shipmentOrdersMeta =
+        this.entityClass.definition.relations['shipmentOrders'];
       this.shipmentOrders = createHasManyRepositoryFactory(
         shipmentOrdersMeta as HasManyDefinition,
         orderRepositoryGetter,

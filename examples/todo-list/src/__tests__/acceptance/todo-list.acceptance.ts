@@ -140,12 +140,24 @@ describe('TodoListApplication', () => {
       return client.get('/todo-lists/99999').expect(404);
     });
 
-    it('updates a todoList by ID', async () => {
+    it('updates a todoList by ID (using patch)', async () => {
       const updatedTodoList = givenTodoList({
         title: 'A different title to the todo list',
       });
       await client
         .patch(`/todo-lists/${persistedTodoList.id}`)
+        .send(updatedTodoList)
+        .expect(204);
+      const result = await todoListRepo.findById(persistedTodoList.id);
+      expect(result).to.containEql(updatedTodoList);
+    });
+
+    it('updates a todoList by ID (using put)', async () => {
+      const updatedTodoList = givenTodoList({
+        title: 'A different title to the todo list',
+      });
+      await client
+        .put(`/todo-lists/${persistedTodoList.id}`)
         .send(updatedTodoList)
         .expect(204);
       const result = await todoListRepo.findById(persistedTodoList.id);
@@ -187,7 +199,7 @@ describe('TodoListApplication', () => {
   it('includes Todos in query result', async () => {
     const list = await givenTodoListInstance(todoListRepo);
     const todo = await givenTodoInstance(todoRepo, {todoListId: list.id});
-    const filter = JSON.stringify({include: [{relation: 'todos'}]});
+    const filter = JSON.stringify({include: ['todos']});
 
     const response = await client.get('/todo-lists').query({filter: filter});
 

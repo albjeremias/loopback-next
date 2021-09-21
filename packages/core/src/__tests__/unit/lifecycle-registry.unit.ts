@@ -7,6 +7,7 @@ import {
   BindingScope,
   Context,
   createBindingFromClass,
+  inject,
   injectable,
 } from '@loopback/context';
 import {expect} from '@loopback/testlab';
@@ -35,6 +36,33 @@ describe('LifeCycleRegistry', () => {
     givenObserver('2');
     await registry.start();
     expect(events).to.eql(['1-start', '2-start']);
+  });
+
+  it('skips notification of disabled groups', async () => {
+    givenObserver('1', 'a');
+    givenObserver('2', 'b');
+    registry.setDisabledGroups(['a']);
+    await registry.start();
+    expect(events).to.eql(['2-start']);
+  });
+
+  it('starts/stops all registered observers with param injections', async () => {
+    givenObserverWithParamInjection('1');
+    givenObserverWithParamInjection('2');
+    context.bind('prefix').to('***');
+    await registry.start();
+    expect(events).to.eql(['***:1-start', '***:2-start']);
+    context.bind('prefix').to('###');
+    events.splice(0, events.length);
+    await registry.stop();
+    expect(events).to.eql(['###:2-stop', '###:1-stop']);
+  });
+
+  it('reports error for observers with param injections if key is not bound', async () => {
+    givenObserverWithParamInjection('1');
+    await expect(registry.start()).to.be.rejectedWith(
+      /The key 'prefix' is not bound to any value in context app/,
+    );
   });
 
   it('starts all registered async observers', async () => {
@@ -150,6 +178,10 @@ describe('LifeCycleRegistry', () => {
     setParallel(parallel?: boolean) {
       this.options.parallel = parallel;
     }
+
+    setDisabledGroups(groups?: string[]) {
+      this.options.disabledGroups = groups;
+    }
   }
 
   async function givenLifeCycleRegistry() {
@@ -174,6 +206,24 @@ describe('LifeCycleRegistry', () => {
       }
       stop() {
         events.push(`${name}-stop`);
+      }
+    }
+    const binding = createBindingFromClass(MyObserver, {
+      key: `observers.observer-${name}`,
+    }).apply(asLifeCycleObserver);
+    context.add(binding);
+
+    return MyObserver;
+  }
+
+  function givenObserverWithParamInjection(name: string, group = '') {
+    @injectable({tags: {[CoreTags.LIFE_CYCLE_OBSERVER_GROUP]: group}})
+    class MyObserver implements LifeCycleObserver {
+      start(@inject('prefix') prefix: string) {
+        events.push(`${prefix}:${name}-start`);
+      }
+      stop(@inject('prefix') prefix: string) {
+        events.push(`${prefix}:${name}-stop`);
       }
     }
     const binding = createBindingFromClass(MyObserver, {

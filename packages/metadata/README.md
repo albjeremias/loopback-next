@@ -495,26 +495,27 @@ const myProp = MetadataInspector.getMethodMetaData<MyMethodMetadata>(
 ```ts
 import {MetadataInspector} from '@loopback/metadata';
 
-const allParamsForMyMethod = MetadataInspector.getAllParameterMetaData<
-  MyParameterMetadata
->(
-  'my-parameter-decorator-key',
-  MyController.prototype, // Use MyController for static methods,
-  'myMethod',
-);
+const allParamsForMyMethod =
+  MetadataInspector.getAllParameterMetaData<MyParameterMetadata>(
+    'my-parameter-decorator-key',
+    MyController.prototype, // Use MyController for static methods,
+    'myMethod',
+  );
 
-const firstParamForMyMethod = MetadataInspector.getMyParameterMetaData<
-  MyParameterMetadata
->(
-  'my-parameter-decorator-key',
-  MyController.prototype, // Use MyController for static methods
-  'myMethod',
-  0, // parameter index
-);
+const firstParamForMyMethod =
+  MetadataInspector.getMyParameterMetaData<MyParameterMetadata>(
+    'my-parameter-decorator-key',
+    MyController.prototype, // Use MyController for static methods
+    'myMethod',
+    0, // parameter index
+  );
 
-const allParamsForConstructor = MetadataInspector.getAllParameterMetaData<
-  MyParameterMetadata
->('my-parameter-decorator-key', MyController, '');
+const allParamsForConstructor =
+  MetadataInspector.getAllParameterMetaData<MyParameterMetadata>(
+    'my-parameter-decorator-key',
+    MyController,
+    '',
+  );
 ```
 
 ### Use strong-typed metadata access key
@@ -565,8 +566,8 @@ npm install --save @loopback/metadata
 
 ## Contributions
 
-- [Guidelines](https://github.com/strongloop/loopback-next/blob/master/docs/CONTRIBUTING.md)
-- [Join the team](https://github.com/strongloop/loopback-next/issues/110)
+- [Guidelines](https://github.com/loopbackio/loopback-next/blob/master/docs/CONTRIBUTING.md)
+- [Join the team](https://github.com/loopbackio/loopback-next/issues/110)
 
 ## Tests
 
@@ -575,7 +576,7 @@ Run `npm test` from the root folder.
 ## Contributors
 
 See
-[all contributors](https://github.com/strongloop/loopback-next/graphs/contributors).
+[all contributors](https://github.com/loopbackio/loopback-next/graphs/contributors).
 
 ## License
 

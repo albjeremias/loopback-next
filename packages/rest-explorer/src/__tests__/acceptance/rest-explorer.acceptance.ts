@@ -168,6 +168,32 @@ describe('API Explorer (acceptance)', () => {
         .expect('content-type', /html/)
         .expect(/\/theme-newspaper.css/);
     });
+
+    it('honors index template path', async () => {
+      await givenAppWithCustomExplorerConfig(undefined, {
+        indexTemplatePath: path.resolve(
+          __dirname,
+          '../../../src/__tests__/fixtures/index.html.ejs',
+        ),
+      });
+
+      // assert the test explorer template overrides the default
+      await request
+        .get('/explorer/')
+        .expect(200)
+        .expect('content-type', /html/)
+        .expect(/TEST LoopBack/);
+    });
+
+    it('honors custom explorer title', async () => {
+      await givenAppWithCustomExplorerConfig(undefined, {
+        indexTitle: 'Custom LoopBack API Explorer',
+      });
+
+      await request
+        .get('/explorer/')
+        .expect(200, /<title>Custom LoopBack API Explorer/);
+    });
   });
 
   context('with custom basePath', () => {

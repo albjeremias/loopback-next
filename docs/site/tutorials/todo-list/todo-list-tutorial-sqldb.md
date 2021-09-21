@@ -47,7 +47,7 @@ database tables look like below:
 ![database tables](todo-list-tutorial-dbtables.png)
 
 {% include note.html content="
-There is ongoing work on supporting strong relations with referential integrity.  For details, please see [epic #2231](https://github.com/strongloop/loopback-next/issues/2331).
+There is ongoing work on supporting strong relations with referential integrity.  For details, please see [epic #2231](https://github.com/loopbackio/loopback-next/issues/2331).
 " %}
 
 #### Specify the foreign key constraints in Todo model
@@ -66,7 +66,7 @@ decorator.
         name: 'fk_todo_todoListId',
         entity: 'TodoList',
         entityKey: 'id',
-        foreignKey: 'todolistid',
+        foreignKey: 'todoListId',
       },
     },
   },
@@ -95,7 +95,7 @@ Similar to the `Todo` model, we will specify the constraints in the `settings`.
         name: 'fk_todoListImage_todoListId',
         entity: 'TodoList',
         entityKey: 'id',
-        foreignKey: 'todolistid',
+        foreignKey: 'todoListId',
       },
     },
   },

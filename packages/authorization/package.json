@@ -1,11 +1,23 @@
 {
   "name": "@loopback/authorization",
-  "version": "0.7.1",
   "description": "A LoopBack component for authorization support.",
+  "version": "0.9.3",
+  "keywords": [
+    "LoopBack",
+    "Authorization"
+  ],
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "IBM Corp.",
+  "copyright.owner": "IBM Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "packages/authorization"
+  },
   "engines": {
-    "node": ">=10.16"
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "acceptance": "lb-mocha \"dist/__tests__/acceptance/**/*.js\"",
@@ -17,32 +29,9 @@
     "unit": "lb-mocha \"dist/__tests__/unit/**/*.js\"",
     "verify": "npm pack && tar xf loopback-authorization*.tgz && tree package && npm run clean"
   },
-  "author": "IBM Corp.",
-  "copyright.owner": "IBM Corp.",
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "peerDependencies": {
-    "@loopback/core": "^2.10.1"
-  },
-  "dependencies": {
-    "@loopback/security": "^0.3.1",
-    "debug": "^4.2.0",
-    "tslib": "^2.0.1"
-  },
-  "devDependencies": {
-    "@loopback/build": "^6.2.4",
-    "@loopback/core": "^2.10.1",
-    "@loopback/testlab": "^3.2.6",
-    "@types/debug": "^4.1.5",
-    "@types/node": "10.17.35",
-    "casbin": "^5.1.5"
-  },
-  "keywords": [
-    "LoopBack",
-    "Authorization"
-  ],
   "files": [
     "README.md",
     "dist",
@@ -50,9 +39,20 @@
     "!*/__tests__",
     "!/fixtures"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "packages/authorization"
+  "peerDependencies": {
+    "@loopback/core": "^2.17.0"
+  },
+  "dependencies": {
+    "@loopback/security": "^0.5.3",
+    "debug": "^4.3.2",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.1",
+    "@loopback/core": "^2.17.0",
+    "@loopback/testlab": "^3.4.3",
+    "@types/debug": "^4.1.7",
+    "@types/node": "10.17.60",
+    "casbin": "^5.11.5"
   }
 }

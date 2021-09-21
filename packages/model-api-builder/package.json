@@ -1,11 +1,19 @@
 {
   "name": "@loopback/model-api-builder",
-  "version": "2.1.15",
   "description": "Types and helpers for packages contributing Model API builders.",
+  "version": "2.3.3",
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "IBM Corp.",
+  "copyright.owner": "IBM Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "packages/model-api-builder"
+  },
   "engines": {
-    "node": ">=10.16"
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "build": "lb-tsc",
@@ -14,24 +22,8 @@
     "test": "",
     "verify": "npm pack && tar xf loopback-model-api-builder*.tgz && tree package && npm run clean"
   },
-  "author": "IBM Corp.",
-  "copyright.owner": "IBM Corp.",
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
-  },
-  "peerDependencies": {
-    "@loopback/core": "^2.10.1",
-    "@loopback/repository": "^3.0.1"
-  },
-  "dependencies": {
-    "tslib": "^2.0.1"
-  },
-  "devDependencies": {
-    "@loopback/build": "^1.7.1",
-    "@loopback/core": "^2.10.1",
-    "@loopback/repository": "^3.0.1",
-    "@types/node": "^10.17.35"
   },
   "files": [
     "README.md",
@@ -39,9 +31,17 @@
     "src",
     "!*/__tests__"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "packages/model-api-builder"
+  "peerDependencies": {
+    "@loopback/core": "^2.17.0",
+    "@loopback/repository": "^3.7.2"
+  },
+  "dependencies": {
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.1",
+    "@loopback/core": "^2.17.0",
+    "@loopback/repository": "^3.7.2",
+    "@types/node": "^10.17.60"
   }
 }

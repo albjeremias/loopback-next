@@ -1,11 +1,24 @@
 {
   "name": "@loopback/health",
-  "version": "0.5.1",
   "description": "An extension exposes health check related endpoints with LoopBack 4",
+  "version": "0.8.3",
+  "keywords": [
+    "LoopBack",
+    "Cloud Native",
+    "Health"
+  ],
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "IBM Corp.",
+  "copyright.owner": "IBM Corp.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopbackio/loopback-next.git",
+    "directory": "extensions/health"
+  },
   "engines": {
-    "node": ">=10.16"
+    "node": "^10.16 || 12 || 14 || 16"
   },
   "scripts": {
     "build": "lb-tsc",
@@ -15,42 +28,29 @@
     "verify": "npm pack && tar xf loopback-extension-health*.tgz && tree package && npm run clean",
     "demo": "./src/__examples__/demo.sh"
   },
-  "author": "IBM Corp.",
-  "copyright.owner": "IBM Corp.",
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "peerDependencies": {
-    "@loopback/core": "^2.10.1",
-    "@loopback/rest": "^7.0.1"
-  },
-  "dependencies": {
-    "@cloudnative/health": "^2.1.2",
-    "tslib": "^2.0.1"
-  },
-  "devDependencies": {
-    "@loopback/build": "^6.2.4",
-    "@loopback/core": "^2.10.1",
-    "@loopback/eslint-config": "^10.0.0",
-    "@loopback/rest": "^7.0.1",
-    "@loopback/testlab": "^3.2.6",
-    "@types/node": "^10.17.35"
-  },
-  "keywords": [
-    "LoopBack",
-    "Cloud Native",
-    "Health"
-  ],
   "files": [
     "README.md",
     "dist",
     "src",
     "!*/__tests__"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/strongloop/loopback-next.git",
-    "directory": "extensions/health"
+  "peerDependencies": {
+    "@loopback/core": "^2.17.0",
+    "@loopback/rest": "^10.0.1"
+  },
+  "dependencies": {
+    "@cloudnative/health": "^2.1.2",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@loopback/build": "^7.0.1",
+    "@loopback/core": "^2.17.0",
+    "@loopback/eslint-config": "^11.0.1",
+    "@loopback/rest": "^10.0.1",
+    "@loopback/testlab": "^3.4.3",
+    "@types/node": "^10.17.60"
   }
 }

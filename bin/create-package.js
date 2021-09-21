@@ -42,10 +42,10 @@
 'use strict';
 
 const build = require('../packages/build');
-const {updateReferences} = require('./update-ts-project-refs');
 const path = require('path');
 const cwd = process.cwd();
 const fs = require('fs-extra');
+const {runMain, updateTsProjectRefs} = require('../packages/monorepo');
 
 /**
  * Return a promise to be resolved by the child process exit event
@@ -69,8 +69,7 @@ function waitForProcessExit(child) {
 /**
  * Main function for the script
  */
-async function main() {
-  let name = process.argv[2];
+async function createPackage(name) {
   if (name == null) {
     console.error(
       'Usage: %s <[parentDir]/package-name> [--yes]',
@@ -115,7 +114,7 @@ async function main() {
   await fixupProject(project);
   await updateCopyrightAndLicense(project, options);
   await bootstrapProject(project);
-  await updateReferences({dryRun: false});
+  await updateTsProjectRefs({dryRun: false});
 
   promptActions(project);
 }
@@ -176,7 +175,7 @@ async function fixupProject({repoRoot, projectDir}) {
     },
     repository: {
       type: 'git',
-      url: 'https://github.com/strongloop/loopback-next.git',
+      url: 'https://github.com/loopbackio/loopback-next.git',
       directory: projectDir,
     },
   };
@@ -238,9 +237,4 @@ function promptActions({projectDir}) {
   console.log('  - CODEOWNERS');
 }
 
-if (require.main === module) {
-  main().catch(err => {
-    console.error(err);
-    process.exit(2);
-  });
-}
+runMain(module, createPackage, process.argv[2]);

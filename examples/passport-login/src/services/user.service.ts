@@ -14,7 +14,8 @@ import {UserIdentityRepository} from '../repositories/user-identity.repository';
  * User service to accept a 'passport' user profile and save it locally
  */
 export class PassportUserIdentityService
-  implements UserIdentityService<PassportProfile, User> {
+  implements UserIdentityService<PassportProfile, User>
+{
   constructor(
     @repository(UserRepository)
     public userRepository: UserRepository,
@@ -89,11 +90,7 @@ export class PassportUserIdentityService
     }
     if (!userId) console.log('user id is empty');
     return this.userRepository.findById(parseInt(userId), {
-      include: [
-        {
-          relation: 'profiles',
-        },
-      ],
+      include: ['profiles'],
     });
   }
 

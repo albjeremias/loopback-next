@@ -14,7 +14,9 @@ const utils = require('../../lib/utils');
 const CONTROLLER_TEMPLATE_PATH_HAS_MANY_THROUGH =
   'controller-relation-template-has-many-through.ts.ejs';
 
-module.exports = class HasManyThroughRelationGenerator extends BaseRelationGenerator {
+module.exports = class HasManyThroughRelationGenerator extends (
+  BaseRelationGenerator
+) {
   constructor(args, opts) {
     super(args, opts);
   }
@@ -65,10 +67,9 @@ module.exports = class HasManyThroughRelationGenerator extends BaseRelationGener
     this.artifactInfo.sourceModelPrimaryKey = options.sourceModelPrimaryKey;
     this.artifactInfo.sourceModelPrimaryKeyType =
       options.sourceModelPrimaryKeyType;
-    this.artifactInfo.throughModelPrimaryKey = options.throughModelPrimaryKey;
-    this.artifactInfo.throughModelPrimaryKeyType =
-      options.throughModelPrimaryKeyType;
-    this.artifactInfo.targetModelPrimaryKey = options.targetModelPrimaryKey;
+
+    this.artifactInfo.targetModelPrimaryKey =
+      options.destinationModelPrimaryKey;
     this.artifactInfo.foreignKeyName = options.foreignKeyName;
     const source = this.templatePath(CONTROLLER_TEMPLATE_PATH_HAS_MANY_THROUGH);
 

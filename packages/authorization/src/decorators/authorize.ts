@@ -30,13 +30,9 @@ export const AUTHORIZATION_CLASS_KEY = MetadataAccessor.create<
   ClassDecorator
 >('authorization:class');
 
-class AuthorizeClassDecoratorFactory extends ClassDecoratorFactory<
-  AuthorizationMetadata
-> {}
+class AuthorizeClassDecoratorFactory extends ClassDecoratorFactory<AuthorizationMetadata> {}
 
-export class AuthorizeMethodDecoratorFactory extends MethodDecoratorFactory<
-  AuthorizationMetadata
-> {
+export class AuthorizeMethodDecoratorFactory extends MethodDecoratorFactory<AuthorizationMetadata> {
   protected mergeWithOwn(
     ownMetadata: MetadataMap<AuthorizationMetadata>,
     target: Object,
@@ -47,7 +43,7 @@ export class AuthorizeMethodDecoratorFactory extends MethodDecoratorFactory<
     ownMetadata = ownMetadata || {};
     let methodMeta = ownMetadata[methodName!];
     if (!methodMeta) {
-      methodMeta = {};
+      methodMeta = {...this.spec};
       ownMetadata[methodName!] = methodMeta;
     }
     if (this.spec.allowedRoles) {
@@ -69,15 +65,12 @@ export class AuthorizeMethodDecoratorFactory extends MethodDecoratorFactory<
       methodMeta.voters = this.merge(methodMeta.voters, this.spec.voters);
     }
 
-    if (this.spec.resource) {
-      methodMeta.resource = this.spec.resource;
-    }
-
     return ownMetadata;
   }
 
   private merge<T>(src?: T[], target?: T[]): T[] {
     const list: T[] = [];
+    if (src === target) return src ?? list;
     const set = new Set<T>(src ?? []);
     if (target) {
       for (const i of target) {
@@ -101,7 +94,7 @@ export function authorize(spec: AuthorizationMetadata) {
     target: any,
     method?: string,
     // Use `any` to for `TypedPropertyDescriptor`
-    // See https://github.com/strongloop/loopback-next/pull/2704
+    // See https://github.com/loopbackio/loopback-next/pull/2704
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     methodDescriptor?: TypedPropertyDescriptor<any>,
   ) {

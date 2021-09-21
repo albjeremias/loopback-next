@@ -12,7 +12,7 @@ adapter module is created for plugging in
 authentication system in `@loopback/authentication@3.x`.
 
 If you would like to try with an example,
-[`@loopback/example-passport-login`](https://github.com/strongloop/loopback-next/tree/master/examples/passport-login)
+[`@loopback/example-passport-login`](https://github.com/loopbackio/loopback-next/tree/master/examples/passport-login)
 uses this module to authenticate APIs with several OAuth 2.0 passport strategies
 like Facebook, Google.
 
@@ -26,7 +26,7 @@ npm i @loopback/authentication-passport --save
 
 `@loopback/authentication@3.x` allows users to register authentication
 strategies that implement the interface
-[`AuthenticationStrategy`](https://apidocs.strongloop.com/@loopback%2fdocs/authentication.html#AuthenticationStrategy)
+[`AuthenticationStrategy`](https://loopback.io/doc/en/lb4/apidocs.authentication.authenticationstrategy.html)
 
 Since `AuthenticationStrategy` describes a strategy with different contracts
 than the passport
@@ -237,7 +237,8 @@ in
    import {Provider, inject} from '@loopback/core';
 
    export class PassportBasicAuthProvider<MyUser>
-     implements Provider<AuthenticationStrategy> {
+     implements Provider<AuthenticationStrategy>
+   {
      constructor(
        @inject('authentication.basic.verify')
        private verifyFn: BasicVerifyFunction,
@@ -284,7 +285,8 @@ in
    import {INVALID_USER_CREDENTIALS_MESSAGE} from '../keys';
 
    export class VerifyFunctionProvider
-     implements Provider<BasicVerifyFunction> {
+     implements Provider<BasicVerifyFunction>
+   {
      constructor(@repository('users') private userRepo: MyUserRepository) {}
 
      value(): BasicVerifyFunction {

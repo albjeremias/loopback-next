@@ -34,8 +34,8 @@ interface CustomerRepository extends Repository<Customer> {
 
 See more examples at:
 
-- [Repository/CrudRepository/EntityRepository](https://github.com/strongloop/loopback-next/blob/master/packages/repository/src/repositories/repository.ts)
-- [KeyValueRepository](https://github.com/strongloop/loopback-next/blob/master/packages/repository/src/repositories/kv.repository.ts)
+- [Repository/CrudRepository/EntityRepository](https://github.com/loopbackio/loopback-next/blob/master/packages/repository/src/repositories/repository.ts)
+- [KeyValueRepository](https://github.com/loopbackio/loopback-next/blob/master/packages/repository/src/repositories/kv.repository.ts)
 
 ## Installation
 
@@ -45,6 +45,10 @@ as a dependency in your application.
 
 You can then install your favorite connector by saving it as part of your
 application dependencies.
+
+## Common Tasks
+
+- [Creating Repository at runtime](Creating-repository-runtime.md)
 
 ## Repository Mixin
 
@@ -301,83 +305,10 @@ Please See [Testing Your Application](Testing-your-application.md) section in
 order to set up and write unit, acceptance, and integration tests for your
 application.
 
-## Creating Repositories at Runtime
-
-Repositories can be created at runtime using the `defineCrudRepositoryClass`
-helper function from the `@loopback/rest-crud` package. It creates
-`DefaultCrudRepository`-based repository classes by default.
-
-```ts
-const BookRepository = defineCrudRepositoryClass<
-  Book,
-  typeof Book.prototype.id,
-  BookRelations
->(BookModel);
-```
-
-In case you want to use a non-`DefaultCrudRepository` repository class or you
-want to create a custom repository, use the `defineRepositoryClass()` helper
-function instead. Pass a second parameter to this function as the base class for
-the new repository.
-
-There are two options for doing this:
-
-#### 1. Using a base repository class
-
-Create a base repository with your custom implementation, and then specify this
-repository as the base class.
-
-```ts
-class MyRepoBase<
-  E extends Entity,
-  IdType,
-  Relations extends object
-> extends DefaultCrudRepository<E, IdType, Relations> {
-  // Custom implementation
-}
-
-const BookRepositoryClass = defineRepositoryClass<
-  typeof BookModel,
-  MyRepoBase<BookModel, typeof BookModel.prototype.id, BookRelations>
->(BookModel, MyRepoBase);
-```
-
-#### 2. Using a Repository mixin
-
-Create a repository mixin with your customization as shown in the
-[Defining A Repository Mixin Class Factory Function](https://loopback.io/doc/en/lb4/migration-models-mixins.html#defining-a-repository-mixin-class-factory-function)
-example, apply the mixin on the base repository class (e.g.
-`DefaultCrudRepository`) then specify this combined repository as the base class
-to be used.
-
-```ts
-const BookRepositoryClass = defineRepositoryClass<
-  typeof BookModel,
-  DefaultCrudRepository<
-    BookModel,
-    typeof BookModel.prototype.id,
-    BookRelations
-  > &
-    FindByTitle<BookModel>
->(BookModel, FindByTitleRepositoryMixin(DefaultCrudRepository));
-```
-
-Dependency injection has to be configured for the datasource as shown below.
-
-```ts
-inject(`datasources.${dsName.name}`)(BookRepository, undefined, 0);
-const repoBinding = app.repository(BookRepository);
-```
-
-{% include note.html content="
-The `app.repository()` method is available only on application classes
-with `RepositoryMixin` applied.
-" %}
-
 ## Access KeyValue Stores
 
 We can now access key-value stores such as [Redis](https://redis.io/) using the
-[KeyValueRepository](https://github.com/strongloop/loopback-next/blob/master/packages/repository/src/repositories/kv.repository.ts).
+[KeyValueRepository](https://github.com/loopbackio/loopback-next/blob/master/packages/repository/src/repositories/kv.repository.ts).
 
 ### Define a KeyValue Datasource
 
@@ -430,9 +361,7 @@ import {ShoppingCart} from '../models/shopping-cart.model';
 import {RedisDataSource} from '../datasources/redis.datasource';
 import {inject} from '@loopback/core';
 
-export class ShoppingCartRepository extends DefaultKeyValueRepository<
-  ShoppingCart
-> {
+export class ShoppingCartRepository extends DefaultKeyValueRepository<ShoppingCart> {
   constructor(@inject('datasources.redis') ds: RedisDataSource) {
     super(ShoppingCart, ds);
   }
@@ -443,7 +372,7 @@ export class ShoppingCartRepository extends DefaultKeyValueRepository<
 
 The KeyValueRepository provides a set of key based operations, such as `set`,
 `get`, `delete`, `expire`, `ttl`, and `keys`. See
-[KeyValueRepository](https://github.com/strongloop/loopback-next/blob/master/packages/repository/src/repositories/kv.repository.ts)
+[KeyValueRepository](https://github.com/loopbackio/loopback-next/blob/master/packages/repository/src/repositories/kv.repository.ts)
 for a complete list.
 
 ```ts
@@ -480,12 +409,12 @@ then fine tune your CRUD methods to your liking.
 ### Example Application
 
 You can look at
-[the account-without-juggler application as an example.](https://github.com/strongloop/loopback-next-example/tree/master/services/account-without-juggler)
+[the account-without-juggler application as an example.](https://github.com/loopbackio/loopback-next-example/tree/master/services/account-without-juggler)
 
 <!--lint enable no-duplicate-headings -->
 
 1.  Implement the `CrudConnector` interface from `@loopback/repository` package.
-    [Here is one way to do it](https://github.com/strongloop/loopback-next-example/blob/master/services/account-without-juggler/repositories/account/datasources/mysqlconn.ts)
+    [Here is one way to do it](https://github.com/loopbackio/loopback-next-example/blob/master/services/account-without-juggler/repositories/account/datasources/mysqlconn.ts)
 
 2.  Implement the `DataSource` interface from `@loopback/repository`. To
     implement the `DataSource` interface, you must give it a name, supply your
@@ -587,4 +516,4 @@ public find(
 ## Example Application
 
 You can look at
-[the account application as an example.](https://github.com/strongloop/loopback4-example-microservices/tree/master/services/account)
+[the account application as an example.](https://github.com/loopbackio/loopback4-example-microservices/tree/master/services/account)

@@ -228,9 +228,7 @@ import {
 } from '@loopback/rest';
 import helmet, {IHelmetConfiguration} from 'helmet';
 
-class HelmetInterceptorProvider extends ExpressMiddlewareInterceptorProvider<
-  IHelmetConfiguration
-> {
+class HelmetInterceptorProvider extends ExpressMiddlewareInterceptorProvider<IHelmetConfiguration> {
   constructor(@config() helmetConfig?: IHelmetConfiguration) {
     super(helmet, helmetConfig);
   }
@@ -320,9 +318,7 @@ import helmet, {IHelmetConfiguration} from 'helmet';
 import {ExpressMiddlewareInterceptorProvider} from '@loopback/rest';
 
 @globalInterceptor('middleware', {tags: {name: 'Helmet'}})
-export class MorganInterceptor extends ExpressMiddlewareInterceptorProvider<
-  IHelmetConfiguration
-> {
+export class MorganInterceptor extends ExpressMiddlewareInterceptorProvider<IHelmetConfiguration> {
   constructor(
     @config()
     options: IHelmetConfiguration = {
@@ -353,6 +349,34 @@ const router = Router();
 router.post('/greet', handler);
 router.get('/hello', handler);
 const binding = server.expressMiddleware('middleware.express.greeting', router);
+```
+
+## Access RequestContext in an Express middleware
+
+In some cases, your Express middleware may need to access LoopBack's
+`RequestContext` to resolve certain bindings. This can be done using
+`getMiddlewareContext` function to access the `MIDDLEWARE_CONTEXT` property of
+the Express request object, which is set up by LoopBack when the
+`RequestContext` is instantiated.
+
+```ts
+import {SecurityBindings} from '@loopback/security';
+import {
+  RequestContext,
+  getMiddlewareContext,
+  Request,
+  Response,
+} from '@loopback/rest';
+
+function myExpressHandler(
+  req: Request,
+  res: Response,
+  next: express.NextFunction,
+) {
+  const reqCtx = getMiddlewareContext<RequestContext>(req);
+  // Now you have access to the LoopBack RequestContext
+  const currentUser = reqCtx.getSync(SecurityBindings.USER);
+}
 ```
 
 ## What's behind the scenes

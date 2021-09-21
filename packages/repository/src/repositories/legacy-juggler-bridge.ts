@@ -4,7 +4,12 @@
 // License text available at https://opensource.org/licenses/MIT
 
 import {Getter} from '@loopback/core';
-import {Filter, FilterExcludingWhere, Inclusion, Where} from '@loopback/filter';
+import {
+  Filter,
+  FilterExcludingWhere,
+  InclusionFilter,
+  Where,
+} from '@loopback/filter';
 import assert from 'assert';
 import legacy from 'loopback-datasource-juggler';
 import {
@@ -106,8 +111,9 @@ export function ensurePromise<T>(p: legacy.PromiseOrVoid<T>): Promise<T> {
 export class DefaultCrudRepository<
   T extends Entity,
   ID,
-  Relations extends object = {}
-> implements EntityCrudRepository<T, ID, Relations> {
+  Relations extends object = {},
+> implements EntityCrudRepository<T, ID, Relations>
+{
   modelClass: juggler.PersistedModelClass;
 
   public readonly inclusionResolvers: Map<
@@ -231,7 +237,7 @@ export class DefaultCrudRepository<
   protected _createHasManyRepositoryFactoryFor<
     Target extends Entity,
     TargetID,
-    ForeignKeyType
+    ForeignKeyType,
   >(
     relationName: string,
     targetRepoGetter: Getter<EntityCrudRepository<Target, TargetID>>,
@@ -273,7 +279,7 @@ export class DefaultCrudRepository<
   protected createHasManyRepositoryFactoryFor<
     Target extends Entity,
     TargetID,
-    ForeignKeyType
+    ForeignKeyType,
   >(
     relationName: string,
     targetRepoGetter: Getter<EntityCrudRepository<Target, TargetID>>,
@@ -320,7 +326,7 @@ export class DefaultCrudRepository<
     TargetID,
     Through extends Entity,
     ThroughID,
-    ForeignKeyType
+    ForeignKeyType,
   >(
     relationName: string,
     targetRepoGetter: Getter<EntityCrudRepository<Target, TargetID>>,
@@ -385,7 +391,7 @@ export class DefaultCrudRepository<
   protected _createHasOneRepositoryFactoryFor<
     Target extends Entity,
     TargetID,
-    ForeignKeyType
+    ForeignKeyType,
   >(
     relationName: string,
     targetRepoGetter: Getter<EntityCrudRepository<Target, TargetID>>,
@@ -405,7 +411,7 @@ export class DefaultCrudRepository<
   protected createHasOneRepositoryFactoryFor<
     Target extends Entity,
     TargetID,
-    ForeignKeyType
+    ForeignKeyType,
   >(
     relationName: string,
     targetRepoGetter: Getter<EntityCrudRepository<Target, TargetID>>,
@@ -695,7 +701,7 @@ export class DefaultCrudRepository<
    */
   protected async includeRelatedModels(
     entities: T[],
-    include?: Inclusion[],
+    include?: InclusionFilter[],
     options?: Options,
   ): Promise<(T & Relations)[]> {
     return includeRelatedModels<T, Relations>(this, entities, include, options);
@@ -765,10 +771,11 @@ export class DefaultCrudRepository<
 export class DefaultTransactionalRepository<
     T extends Entity,
     ID,
-    Relations extends object = {}
+    Relations extends object = {},
   >
   extends DefaultCrudRepository<T, ID, Relations>
-  implements TransactionalEntityRepository<T, ID, Relations> {
+  implements TransactionalEntityRepository<T, ID, Relations>
+{
   async beginTransaction(
     options?: IsolationLevel | Options,
   ): Promise<Transaction> {

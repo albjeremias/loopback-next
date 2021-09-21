@@ -56,8 +56,7 @@ export class GraphQLServer extends Context implements Server {
     parent?: Context,
   ) {
     super(parent, 'graphql-server');
-
-    // An internal express application for GraphQL only
+    this.scope = BindingScope.SERVER;
     this.expressApp = express();
     if (options.expressSettings) {
       for (const p in options.expressSettings) {
@@ -115,9 +114,8 @@ export class GraphQLServer extends Context implements Server {
   }
 
   async start() {
-    const resolverClasses = (this.getResolverClasses() as unknown) as NonEmptyArray<
-      Function
-    >;
+    const resolverClasses =
+      this.getResolverClasses() as unknown as NonEmptyArray<Function>;
 
     // Get the configured auth checker
     const authChecker: AuthChecker =
@@ -159,7 +157,10 @@ export class GraphQLServer extends Context implements Server {
       schema,
     };
     const graphQLServer = new ApolloServer(serverConfig);
-    graphQLServer.applyMiddleware({app: this.expressApp});
+    graphQLServer.applyMiddleware({
+      app: this.expressApp,
+      ...this.options.middlewareOptions,
+    });
 
     // Set up subscription handlers
     if (this.httpServer && serverConfig.subscriptions) {

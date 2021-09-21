@@ -1,0 +1,157 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+  schedule:
+    - cron: '0 2 * * 1' # At 02:00 on Monday
+
+permissions: {}
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  test:
+    name: Test
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [10, 12, 14, 16]
+        include:
+          - os: macos-latest
+            node-version: 14 # LTS
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Update NPM
+        run: npm install -g npm
+      - name: Bootstrap project
+        run: |
+          npm ci --ignore-scripts
+          npm run postinstall
+      - name: Build project
+        run: |
+          npm run clean
+          npm run build
+      - uses: Yuri6037/Action-FakeTTY@v1.1
+      - name: Run tests
+        run: faketty npm test --ignore-scripts
+      - name: Generate coverage report
+        run: npm run coverage:ci --ignore-scripts
+      - name: Publish coverage report to Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          flag-name: run-${{ matrix.os }}-node@${{ matrix.node-version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel: true
+
+  posttest:
+    name: Post-Test
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true
+
+  test-benchmark:
+    name: Test Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Bootstrap benchmark tests
+        run: |
+          npm ci --ignore-scripts
+          npx lerna bootstrap --scope "@loopback/benchmark" --include-dependencies
+      - name: Run benchmark tests
+        run: npm test --prefix benchmark
+
+  code-lint:
+    name: Code Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Bootstrap project
+        run: |
+          npm ci --ignore-scripts
+          npm run postinstall
+      - name: Build project
+        run: npm run build
+      - name: Verify code linting
+        run: npm run lint
+      - name: Verify package metadata
+        run: npm run check-package-metadata
+
+  commit-lint:
+    name: Commit Lint
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Install monorepo tools
+        run: |
+          npm ci --ignore-scripts
+          npx lerna bootstrap --scope "@loopback/monorepo" --include-dependencies
+      - name: Verify commit linting
+        run: npx commitlint --from origin/master --to HEAD --verbose
+
+  ci-lint:
+    name: CI Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Install monorepo tools
+        run: npm ci --ignore-scripts
+      - name: Validate Renovate config
+        run: npx --no-install renovate-config-validator
+
+  verify-docs:
+    name: Verify Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Bootstrap project
+        run: |
+          npm ci --ignore-scripts
+          npm run postinstall
+      - name: Build project
+        run: npm run build
+      - name: Verify doc changes
+        run: ./bin/verify-doc-changes.sh

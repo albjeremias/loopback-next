@@ -7,6 +7,16 @@
 
 'use strict';
 
+exports[`app-generator specific files creates .mocharc.json 1`] = `
+{
+  "exit": true,
+  "recursive": true,
+  "require": "source-map-support/register"
+}
+
+`;
+
+
 exports[`app-generator specific files generates all the proper files 1`] = `
 # my-app
 
@@ -42,21 +52,17 @@ Open http://127.0.0.1:3000 in your browser.
 
 To incrementally build the project:
 
-\`\`\`
+\`\`\`sh
 npm run build
 \`\`\`
 
 To force a full build by cleaning up cached artifacts:
 
-\`\`\`
-npm run clean
-npm run build
+\`\`\`sh
+npm run rebuild
 \`\`\`
 
 ## Fix code style and formatting issues
-
-If \`eslint\` and \`prettier\` are enabled for this project, you can use the
-following commands to check code style and formatting issues.
 
 \`\`\`sh
 npm run lint
@@ -86,7 +92,7 @@ npm test
 Please check out [LoopBack 4 documentation](https://loopback.io/doc/en/lb4/) to
 understand how you can continue to add features to this application.
 
-[![LoopBack](<https://github.com/strongloop/loopback-next/raw/master/docs/site/imgs/branding/Powered-by-LoopBack-Badge-(blue)-@2x.png>)](http://loopback.io/)
+[![LoopBack](https://github.com/loopbackio/loopback-next/raw/master/docs/site/imgs/branding/Powered-by-LoopBack-Badge-(blue)-@2x.png)](http://loopback.io/)
 
 `;
 
@@ -193,8 +199,14 @@ if (require.main === module) {
 
 
 exports[`app-generator specific files generates all the proper files 5`] = `
-import {Request, RestBindings, get, ResponseObject} from '@loopback/rest';
 import {inject} from '@loopback/core';
+import {
+  Request,
+  RestBindings,
+  get,
+  response,
+  ResponseObject,
+} from '@loopback/rest';
 
 /**
  * OpenAPI response for ping()
@@ -230,11 +242,8 @@ export class PingController {
   constructor(@inject(RestBindings.Http.REQUEST) private req: Request) {}
 
   // Map to \`GET /ping\`
-  @get('/ping', {
-    responses: {
-      '200': PING_RESPONSE,
-    },
-  })
+  @get('/ping')
+  @response(200, PING_RESPONSE)
   ping(): object {
     // Reply with a greeting, the current time, the url, and request headers
     return {
@@ -375,7 +384,7 @@ migrate(process.argv).catch(err => {
 
 exports[`app-generator specific files generates docker files 1`] = `
 # Check out https://hub.docker.com/_/node to select a new base image
-FROM node:10-slim
+FROM node:16-slim
 
 # Set to a non-root built-in user \`node\`
 USER node

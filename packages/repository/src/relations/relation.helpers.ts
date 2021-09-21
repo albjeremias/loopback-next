@@ -5,14 +5,14 @@
 
 import assert from 'assert';
 import debugFactory from 'debug';
-import _ from 'lodash';
+import _, {cloneDeep} from 'lodash';
 import {
   AnyObject,
   Entity,
   EntityCrudRepository,
   Filter,
   FilterBuilder,
-  Inclusion,
+  InclusionFilter,
   Options,
   Where,
 } from '..';
@@ -30,7 +30,7 @@ const debug = debugFactory('loopback:repository:relation-helpers');
 export async function findByForeignKeys<
   Target extends Entity,
   TargetRelations extends object,
-  ForeignKey extends StringKeyOf<Target>
+  ForeignKey extends StringKeyOf<Target>,
 >(
   targetRepository: EntityCrudRepository<Target, unknown, TargetRelations>,
   fkName: ForeignKey,
@@ -39,22 +39,16 @@ export async function findByForeignKeys<
   options?: Options,
 ): Promise<(Target & TargetRelations)[]> {
   let value;
+  scope = cloneDeep(scope);
 
   if (Array.isArray(fkValues)) {
     if (fkValues.length === 0) return [];
-    value =
-      fkValues.length === 1
-        ? fkValues[0]
-        : {
-            // Create a copy to prevent query coercion algorithm
-            // inside connectors from modifying the original values
-            inq: [...fkValues],
-          };
+    value = fkValues.length === 1 ? fkValues[0] : {inq: fkValues};
   } else {
     value = fkValues;
   }
 
-  const where = ({[fkName]: value} as unknown) as Where<Target>;
+  const where = {[fkName]: value} as unknown as Where<Target>;
 
   if (scope && !_.isEmpty(scope)) {
     // combine where clause to scope filter
@@ -80,13 +74,15 @@ export type StringKeyOf<T> = Extract<keyof T, string>;
 
 export async function includeRelatedModels<
   T extends Entity,
-  Relations extends object = {}
+  Relations extends object = {},
 >(
   targetRepository: EntityCrudRepository<T, unknown, Relations>,
   entities: T[],
-  include?: Inclusion[],
+  include?: InclusionFilter[],
   options?: Options,
 ): Promise<(T & Relations)[]> {
+  entities = cloneDeep(entities);
+  include = cloneDeep(include);
   const result = entities as (T & Relations)[];
   if (!include) return result;
 
@@ -102,12 +98,16 @@ export async function includeRelatedModels<
     const err = new Error(msg);
     Object.assign(err, {
       code: 'INVALID_INCLUSION_FILTER',
+      statusCode: 400,
     });
     throw err;
   }
 
   const resolveTasks = include.map(async inclusionFilter => {
-    const relationName = inclusionFilter.relation;
+    const relationName =
+      typeof inclusionFilter === 'string'
+        ? inclusionFilter
+        : inclusionFilter.relation;
     const resolver = targetRepository.inclusionResolvers.get(relationName)!;
     const targets = await resolver(entities, inclusionFilter, options);
 
@@ -130,9 +130,9 @@ export async function includeRelatedModels<
  */
 function isInclusionAllowed<T extends Entity, Relations extends object = {}>(
   targetRepository: EntityCrudRepository<T, unknown, Relations>,
-  include: Inclusion,
+  include: InclusionFilter,
 ): boolean {
-  const relationName = include.relation;
+  const relationName = typeof include === 'string' ? include : include.relation;
   if (!relationName) {
     debug('isInclusionAllowed for %j? No: missing relation name', include);
     return false;

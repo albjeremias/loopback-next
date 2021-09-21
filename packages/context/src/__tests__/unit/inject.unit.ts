@@ -105,21 +105,21 @@ describe('function argument injection', () => {
     expect(meta.map(m => m.bindingSelector)).to.deepEqual([]);
   });
 
-  // https://github.com/strongloop/loopback-next/issues/2946
+  // https://github.com/loopbackio/loopback-next/issues/2946
   it('allows custom decorator that returns a new constructor', () => {
     class HelloController {
       name = 'Leonard';
     }
 
-    const mixinDecorator = () => <C extends Constructor<object>>(
-      baseConstructor: C,
-    ) =>
-      class extends baseConstructor {
-        classProperty = 'a classProperty';
-        classFunction() {
-          return 'a classFunction';
-        }
-      };
+    const mixinDecorator =
+      () =>
+      <C extends Constructor<object>>(baseConstructor: C) =>
+        class extends baseConstructor {
+          classProperty = 'a classProperty';
+          classFunction() {
+            return 'a classFunction';
+          }
+        };
 
     @mixinDecorator()
     class Test {

@@ -3,14 +3,13 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
+const {Project} = require('@lerna/project');
+const {Minimatch} = require('minimatch');
 const _ = require('lodash');
-const Minimatch = require('minimatch').Minimatch;
-const {git, getYears} = require('./git');
 const path = require('path');
-const {FSE, jsOrTsFiles} = require('./fs');
 const chalk = require('chalk');
-const Project = require('@lerna/project');
-
+const {git, getYears} = require('./git');
+const {FSE, jsOrTsFiles} = require('./fs');
 const {spdxLicenseList} = require('./license');
 
 const debug = require('debug')('loopback:cli:copyright');
@@ -47,11 +46,23 @@ function getCustomTemplate(customLicenseLines = []) {
 // Patterns for matching previously generated copyright headers
 const BLANK = /^\s*$/;
 
+/**
+ * Preserve characters that have special meaning for RegExp
+ * @param {string} text - Text
+ */
+function escapeRegExp(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 function getHeaderRegEx(customLicenseLines) {
-  const ANY = COPYRIGHT.concat(LICENSE, customLicenseLines).map(
-    l => new RegExp(l.replace(/<%[^>]+%>/g, '.*')),
+  const lines =
+    customLicenseLines != null && customLicenseLines.length
+      ? customLicenseLines
+      : COPYRIGHT.concat(LICENSE, customLicenseLines);
+  const regExp = lines.map(
+    l => new RegExp(escapeRegExp(l).replace(/<%[^>]+%>/g, '.*')),
   );
-  return ANY;
+  return regExp;
 }
 
 /**

@@ -30,6 +30,7 @@ Available commands:
   lb4 uninstall-completion
 `;
 
+
 exports[`cli prints commands with --help 1`] = `
 Available commands:
   lb4 app
@@ -52,6 +53,7 @@ Available commands:
   lb4 install-completion
   lb4 uninstall-completion
 `;
+
 
 exports[`cli saves command metadata to .yo-rc.json 1`] = `
 {
@@ -1397,6 +1399,34 @@ exports[`cli saves command metadata to .yo-rc.json 1`] = `
           "required": false,
           "description": "Through model",
           "name": "throughModel",
+          "hide": false
+        },
+        "sourceModelPrimaryKey": {
+          "type": "String",
+          "required": false,
+          "description": "Primary key on source model",
+          "name": "sourceModelPrimaryKey",
+          "hide": false
+        },
+        "sourceModelPrimaryKeyType": {
+          "type": "String",
+          "required": false,
+          "description": "Type of the primary key on source model",
+          "name": "sourceModelPrimaryKeyType",
+          "hide": false
+        },
+        "destinationModelPrimaryKey": {
+          "type": "String",
+          "required": false,
+          "description": "Primary key on destination model",
+          "name": "destinationModelPrimaryKey",
+          "hide": false
+        },
+        "destinationModelPrimaryKeyType": {
+          "type": "String",
+          "required": false,
+          "description": "Type of the primary key on destination model",
+          "name": "destinationModelPrimaryKeyType",
           "hide": false
         },
         "sourceKeyOnThrough": {

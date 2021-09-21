@@ -88,7 +88,7 @@ export class OASEnhancerService {
    */
   async applyEnhancerByName(name: string): Promise<OpenApiSpec> {
     const enhancer = await this.getEnhancerByName(name);
-    if (enhancer) this._spec = enhancer.modifySpec(this._spec);
+    if (enhancer) this._spec = await enhancer.modifySpec(this._spec);
     return this._spec;
   }
 
@@ -100,7 +100,7 @@ export class OASEnhancerService {
     const enhancers = await this.getEnhancers();
     if (_.isEmpty(enhancers)) return this._spec;
     for (const e of enhancers) {
-      this._spec = e.modifySpec(this._spec);
+      this._spec = await e.modifySpec(this._spec);
     }
     debug(`Spec enhancer service, generated spec: ${inspect(this._spec)}`);
     return this._spec;
@@ -117,11 +117,12 @@ export class OASEnhancerService {
  *
  * @param currentSpec The original spec
  * @param patchSpec The patch spec to be merged into the original spec
+ * @returns A new specification object created by merging the original ones.
  */
-export function mergeOpenAPISpec(
-  currentSpec: Partial<OpenApiSpec>,
-  patchSpec: Partial<OpenApiSpec>,
-) {
+export function mergeOpenAPISpec<
+  C extends Partial<OpenApiSpec>,
+  P extends Partial<OpenApiSpec>,
+>(currentSpec: C, patchSpec: P): C & P {
   const mergedSpec = jsonmergepatch.merge(currentSpec, patchSpec);
   return mergedSpec;
 }

@@ -3,11 +3,11 @@
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
 
-import {Filter, Inclusion} from '@loopback/filter';
+import {Filter, InclusionFilter} from '@loopback/filter';
 import debugFactory from 'debug';
 import {AnyObject, Options} from '../../common-types';
 import {Entity} from '../../model';
-import {EntityCrudRepository} from '../../repositories/repository';
+import {EntityCrudRepository} from '../../repositories';
 import {
   findByForeignKeys,
   flattenTargetsOfOneToManyRelation,
@@ -16,7 +16,9 @@ import {
 import {Getter, HasManyDefinition, InclusionResolver} from '../relation.types';
 import {resolveHasManyMetadata} from './has-many.helpers';
 
-const debug = debugFactory('loopback:repository:has-many-inclusion-resolver');
+const debug = debugFactory(
+  'loopback:repository:relations:has-many:inclusion-resolver',
+);
 
 /**
  * Creates InclusionResolver for HasMany relation.
@@ -31,7 +33,7 @@ const debug = debugFactory('loopback:repository:has-many-inclusion-resolver');
 export function createHasManyInclusionResolver<
   Target extends Entity,
   TargetID,
-  TargetRelations extends object
+  TargetRelations extends object,
 >(
   meta: HasManyDefinition,
   getTargetRepo: Getter<
@@ -42,7 +44,7 @@ export function createHasManyInclusionResolver<
 
   return async function fetchHasManyModels(
     entities: Entity[],
-    inclusion: Inclusion,
+    inclusion: InclusionFilter,
     options?: Options,
   ): Promise<((Target & TargetRelations)[] | undefined)[]> {
     if (!entities.length) return [];
@@ -60,12 +62,15 @@ export function createHasManyInclusionResolver<
       sourceIds.map(i => typeof i),
     );
 
+    const scope =
+      typeof inclusion === 'string' ? {} : (inclusion.scope as Filter<Target>);
+
     const targetRepo = await getTargetRepo();
     const targetsFound = await findByForeignKeys(
       targetRepo,
       targetKey,
       sourceIds,
-      inclusion.scope as Filter<Target>,
+      scope,
       options,
     );
 

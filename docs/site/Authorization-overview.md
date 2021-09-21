@@ -12,7 +12,7 @@ permalink: /doc/en/lb4/Authorization-overview.html
 > rights/privileges to resources
 
 LoopBack's highly extensible authorization package
-[@loopback/authorization](https://github.com/strongloop/loopback-next/tree/master/packages/authorization)
+[@loopback/authorization](https://github.com/loopbackio/loopback-next/tree/master/packages/authorization)
 provides various features and provisions to check access rights of a client on a
 API endpoint.
 
@@ -30,9 +30,8 @@ by the users.
 A `Principal` could be a User, Application or Device. The `Principal` is
 identified from the credential provided by a client, by the configured
 `Authentication strategy` of the endpoint
-([see, LoopBack Authentication](https://loopback.io/doc/en/lb4/Loopback-component-authentication.html)).
-Access rights of the client is either associated with or included in the
-credential.
+([see, LoopBack Authentication](Loopback-component-authentication.md)). Access
+rights of the client is either associated with or included in the credential.
 
 The `Principal` is then used by LoopBack's authorization mechanism to enforce
 necessary privileges/access rights by using the permissions annotated by the
@@ -74,15 +73,15 @@ approach authorization.
 `Developers` need to,
 
 - mount the authorization component, see
-  [Registering the Authorization Component](#registering-the-authorization-component)
+  [Registering the Authorization Component](Authorization-component.md)
 - decorate endpoints with authorization metadata, see
-  [Configuring API Endpoints](#configuring-api-endpoints)
+  [Configuring API Endpoints](Authorization-component-decorator.md)
 - define `authorizer` and `voter` functions, see
-  [Programming Access Policies](#programming-access-policies)
+  [Programming Access Policies](Authorization-component-interceptor.md)
 - design security policies as decision matrix, see
-  [Authorization by decision matrix](#authorization-by-decision-matrix)
+  [Authorization by decision matrix](Authorization-component-decision-matrix.md)
 - plug in external enforcer libraries, see
-  [Enforcer Libraries](#enforcer-libraries)
+  [Enforcer Libraries](Authorization-component-enforcer.md)
 
 ## Tutorials
 

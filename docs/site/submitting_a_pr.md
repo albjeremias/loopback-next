@@ -110,7 +110,7 @@ v4.
 
 ### 1. Fork the loopback-next repository
 
-In your browser, navigate to <https://github.com/strongloop/loopback-next>.
+In your browser, navigate to <https://github.com/loopbackio/loopback-next>.
 
 Create your own fork of the repository by pressing the `Fork` link on the
 right-hand side.
@@ -308,7 +308,7 @@ To `rebase` your forked repository's `master` branch off of the original
 repository, run:
 
 ```
-git remote add upstream git@github.com:strongloop/loopback-next.git
+git remote add upstream git@github.com:loopbackio/loopback-next.git
 git checkout master
 git pull --rebase upstream master
 git push --force-with-lease origin master
@@ -469,6 +469,16 @@ The remote feature branch and the pull request now have one commit.
 
 ![submit_pr_squash_commits_7.png](./imgs/submit_pr_squash_commits_7.png)
 
+If you find that you have commits in your PR that don't belong to you, run the
+following on your branch:
+
+```sh
+git fetch origin
+git rebase origin/master
+```
+
+Then push your branch again.
+
 ### 10. Ensure CI jobs complete successfully
 
 The `post-condition` to your pull request being approved, is that all the
@@ -492,8 +502,8 @@ Here you can investigate the status of the job, its sub-jobs, or restart them.
 ### 11. Maintainer merges the pull request
 
 When a project maintainer is satisfied with the pull request, he/she will
-`merge` it into the `master` branch of the `strongloop/loopback-next`
-[repo](https://github.com/strongloop/loopback-next).
+`merge` it into the `master` branch of the `loopbackio/loopback-next`
+[repo](https://github.com/loopbackio/loopback-next).
 
 ## References
 
